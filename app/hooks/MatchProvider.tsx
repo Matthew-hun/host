@@ -1,11 +1,13 @@
 // src/context/MatchContext.tsx
 "use client";
 import React, { createContext, useContext, useState } from "react";
-import { Leg, Match, Team, Throws } from "../types/types";
+import { CheckOutMode, CheckOutThrow, Leg, Match, Team, Throw } from "../types/types";
 
 type MatchContextType = {
   match: Match | null;
   setMatch: (match: Match) => void;
+  isRunning: boolean;
+  setIsRunning: (value: boolean) => void;
 };
 
 type Mode = "First to" | "Best of";
@@ -14,9 +16,11 @@ const MatchContext = createContext<MatchContextType | undefined>(undefined);
 
 export const MatchProvider = ({ children }: { children: React.ReactNode }) => {
   const [match, setMatch] = useState<Match | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
+
 
   return (
-    <MatchContext.Provider value={{ match, setMatch }}>
+    <MatchContext.Provider value={{ match, setMatch, isRunning, setIsRunning }}>
       {children}
     </MatchContext.Provider>
   );
@@ -28,7 +32,7 @@ export default function useMatch() {
     throw new Error("useMatch must be used within a MatchProvider");
   }
 
-  const { match, setMatch } = context;
+  const { match, setMatch, isRunning, setIsRunning } = context;
 
   const CreateMatch = (
     teams: Team[],
@@ -37,7 +41,7 @@ export default function useMatch() {
     startingScore: number,
     randomStartingTeam: boolean,
     randomStartingPlayer: boolean,
-    doubleOut: boolean
+    checkOutMode: CheckOutMode,
   ) => {
     // Biztosítsuk, hogy a csapatok teljesen tiszták legyenek
     const cleanTeams: Team[] = teams.map((team, index) => ({
@@ -78,7 +82,7 @@ export default function useMatch() {
         startingScore: startingScore,
         legs: legs,
         maxLeg: maxLegs,
-        doubleOut: doubleOut,
+        checkOutMode: checkOutMode,
         randomStartingTeam: randomStartingTeam,
         randomStartingPlayer: randomStartingPlayer,
       },
@@ -88,6 +92,7 @@ export default function useMatch() {
     setMatch(newMatch);
     saveMatch(newMatch);
     console.log("Match created:", newMatch);
+    setIsRunning(true);
   };
 
   const NextRound = async (inputScore: string) => {
@@ -97,7 +102,7 @@ export default function useMatch() {
     const score = Number(inputScore);
     const remaining = GetRemainingScore(match.currentTeamIndex);
 
-    if (!regex.test(inputScore)) {
+    if (!regex.test(inputScore) && inputScore !== "") {
       throw new Error("Please provide a valid score");
     } else if (score < 0 || score > 180) {
       throw new Error("Please input a score between 0 and 180");
@@ -135,7 +140,6 @@ export default function useMatch() {
     }
   };
 
-
   const IncreaseTeamIndex = () => {
     if (!match) return;
     //!IN THE END
@@ -164,6 +168,7 @@ export default function useMatch() {
   const Over = () => {
     if (!match) return;
 
+    setIsRunning(false);
     const winnerTeam = GetWinner();
 
     const updatedMatch: Match = {
@@ -497,6 +502,34 @@ export default function useMatch() {
     return uniqueResults;
   };
 
+  // const GetCheckOuts2 = (remainingScore: number): [] => {
+  //   if (!match) return [];
+  //   if (remainingScore > 170) return [];
+  //   switch (match.matchSettings.checkOutMode) {
+  //     case 'Simple':
+  //       return GetCheckOutSimple(remainingScore);
+  //     case 'Double':
+  //       return GetCheckOutDouble(remainingScore);
+  //     case 'Triple':
+  //       return GetCheckOutTriple(remainingScore);
+  //     default:
+  //       return [];
+  //   }
+  // }
+
+  // const GetCheckOutSimple = (remainingScore: number): [] => {
+
+  //   return [];
+  // }
+  // const GetCheckOutDouble = (remainingScore: number): [] => {
+
+  //   return [];
+  // }
+  // const GetCheckOutTriple = (remainingScore: number): [] => {
+
+  //   return [];
+  // }
+
   const GetRemainingScore = (teamIndex: number): number => {
     if (!match || match.currentLegIndex === undefined) {
       throw new Error("Match or current leg is undefined.");
@@ -511,7 +544,6 @@ export default function useMatch() {
 
     return matchSettings.startingScore - totalScore;
   };
-
 
   const saveMatch = (updated: Match) => {
     setMatch({ ...updated });
@@ -554,9 +586,17 @@ export default function useMatch() {
     saveMatch(updatedMatch);
   };
 
+  const GetPlayerScores = (teamIndex: number, playerIndex: number | null) => {
+    if (!match || match.currentLegIndex === undefined || playerIndex === null) return;
+
+    return match.legs[match.currentLegIndex].legScoreHistory.filter((score) => score.teamId == teamIndex && score.playerId.playerId == playerIndex);
+  }
+
   return {
     match,
     setMatch,
+    isRunning,
+    setIsRunning,
     CurrentTeamIndex: match?.currentTeamIndex,
     NextRound,
     SetCurrentTeamIndex,
@@ -570,5 +610,7 @@ export default function useMatch() {
     GetRemainingScore,
     BiggestScorePlayer,
     GetThrownDartsToCheckOut,
+    GetPlayerScores,
+    GetWinner,
   };
 }

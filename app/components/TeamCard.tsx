@@ -4,6 +4,7 @@ import useMatch from "../hooks/MatchProvider";
 import PlayerCard from "./PlayerCard";
 import ScoreHistory from "./ScoreHistory";
 import CheckOut from "./CheckOut";
+import { FaCrown } from "react-icons/fa";
 import { Progress } from "antd";
 
 interface TeamCardProps {
@@ -110,6 +111,11 @@ const TeamCard: FC<TeamCardProps> = ({ team, teamIndex }) => {
   return (
     <div onClick={() => SetCurrentTeamIndex(teamIndex)} className={cardClasses}>
       {/* Score Display */}
+      {
+        match?.winnerTeamIndex === teamIndex && <div className="absolute -right-5 -top-5 rotate-45">
+          <FaCrown size={50} />
+        </div>
+      }
       <div className="relative my-10 flex items-center justify-center z-2">
         <Progress
           type="dashboard"

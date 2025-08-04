@@ -5,7 +5,7 @@ export type Player = {
   name: string;
 };
 
-export type Throws = {
+export type Throw = {
   throwId: number;
   playerId: Player;
   teamId: number;
@@ -25,7 +25,7 @@ export type Team = {
 export type Leg = {
   legId: number;
   winnerTeamId: number | null;
-  legScoreHistory: Throws[];
+  legScoreHistory: Throw[];
   isFinished: boolean;
   thrownDartsToCheckOut: number | null;
 };
@@ -35,7 +35,7 @@ export type MatchSettings = {
   startingScore: number;
   legs: number;
   maxLeg: number;
-  doubleOut: boolean;
+  checkOutMode: CheckOutMode;
   randomStartingTeam: boolean;
   randomStartingPlayer: boolean;
 };
@@ -49,3 +49,10 @@ export type Match = {
   isOver: boolean;
   winnerTeamIndex: number | undefined;
 };
+
+export type CheckOutMode = 'Simple' | 'Double' | 'Triple';
+
+export type CheckOutThrow = {
+  score: number,
+  type: CheckOutMode,
+}

@@ -5,7 +5,7 @@ import useMatch from "../../hooks/MatchProvider";
 import Navbar from "../../components/Navbar";
 import usePlayers from "../../hooks/usePlayers";
 import GameSetup from "../../components/GameSetup";
-import { TfiStatsUp } from "react-icons/tfi";
+import { FiBarChart2 } from "react-icons/fi";
 import MatchStats from "../../components/MatchStats";
 import { MdSettings } from "react-icons/md";
 import { set } from "zod/v4-mini";
@@ -13,10 +13,11 @@ import TeamCard from "../../components/TeamCard";
 import ScoreInput from "../../components/ScoreInput";
 import type { NotificationArgsProps } from "antd";
 import LegData from "@/app/components/LegData";
+import StopWatch from "@/app/components/StopWatch";
 
 export default function Home() {
   const matchManager = useMatch();
-  const { match, RemoveScore, CreateMatch } = matchManager;
+  const { match, isRunning, RemoveScore, CreateMatch } = matchManager;
   const [openDrawer, setOpenDrawer] = useState(false);
 
   const showDrawer = () => {
@@ -27,7 +28,7 @@ export default function Home() {
     setOpenDrawer(false);
   };
 
-  const [isGameSettingsOpen, setIsModalOpen] = useState(true);
+  const [isGameSettingsOpen, setIsModalOpen] = useState(false);
   const [nextMatchOpen, setNextMatchOpen] = useState(false);
 
   const showGameSettings = () => {
@@ -51,7 +52,7 @@ export default function Home() {
       match?.matchSettings.startingScore,
       match?.matchSettings.randomStartingTeam,
       match?.matchSettings.randomStartingPlayer,
-      match?.matchSettings.doubleOut
+      match?.matchSettings.checkOutMode,
     );
     setNextMatchOpen(false);
   };
@@ -83,8 +84,8 @@ export default function Home() {
     if (localStorageMatch) {
       const parsedMatch = JSON.parse(localStorageMatch);
       matchManager.setMatch(parsedMatch);
-
-      handleCancelGameSettings();
+    } else {
+      setIsModalOpen(true);
     }
   }, []);
 
@@ -163,6 +164,7 @@ export default function Home() {
           colorBgContainer: "var(--color-background-light)",
           colorTextPlaceholder: "var(--color-placeholder)",
           colorSuccess: "#fff",
+          colorBgElevated: "var(--color-background-light)",
         },
       }}
     >
@@ -229,8 +231,8 @@ export default function Home() {
             />
             <LegData />
             <div>
-              <TfiStatsUp
-                className="invisible text-2xl text-emerald-500 mx-auto mb-2 cursor-pointer hover:text-emerald-600 transition-colors duration-200"
+              <FiBarChart2
+                className="text-2xl text-emerald-500 mx-auto mb-2 cursor-pointer hover:text-emerald-600 transition-colors duration-200"
                 onClick={showDrawer}
               />
             </div>
@@ -238,7 +240,7 @@ export default function Home() {
 
           <div id="Teams" className="flex items-stretch gap-5">
             {match?.teams.map((team, teamIndex) => {
-              return <TeamCard team={team} teamIndex={teamIndex} key={teamIndex}/>;
+              return <TeamCard team={team} teamIndex={teamIndex} key={teamIndex} />;
             })}
           </div>
 

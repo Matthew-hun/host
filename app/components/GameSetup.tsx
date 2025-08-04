@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
 import usePlayers from "../hooks/usePlayers";
-import { Leg, Match, Team } from "../types/types";
+import { CheckOutMode, Leg, Match, Team } from "../types/types";
 import {
   Button,
   Form,
@@ -21,7 +21,7 @@ interface GameSetupProps {
   Close: () => void;
 }
 
-const GameSetup: FC<GameSetupProps> = ({ Close }) => {
+const GameSetup: FC<GameSetupProps> = ({Close}) => {
   const maxLegLength = 5; // Maximum number of legs
   const { players } = usePlayers();
   const [teams, setTeams] = useState<Team[]>([]);
@@ -36,7 +36,7 @@ const GameSetup: FC<GameSetupProps> = ({ Close }) => {
   const [randomStartingTeam, setRandomStartingTeam] = useState<boolean>(false);
   const [randomStartingPlayer, setRandomStartingPlayer] =
     useState<boolean>(false);
-  const [doubleOut, setDoubleOut] = useState<boolean>(true);
+  const [checkOutMode, setCheckOutMode] = useState<CheckOutMode>('Simple');
 
   useEffect(() => {
     const localStorageMatch = localStorage.getItem("match");
@@ -44,7 +44,7 @@ const GameSetup: FC<GameSetupProps> = ({ Close }) => {
     if (localStorageMatch) {
       const parsedMatch = JSON.parse(localStorageMatch);
       setTeams(parsedMatch.teams);
-      setDoubleOut(parsedMatch.matchSettings.doubleOut);
+      setCheckOutMode(parsedMatch.matchSettings.checkOutMode);
       setStartingScore(parsedMatch.matchSettings.startingScore);
       setMode(parsedMatch.matchSettings.mode);
       setLegs(parsedMatch.matchSettings.legs);
@@ -53,8 +53,8 @@ const GameSetup: FC<GameSetupProps> = ({ Close }) => {
     }
   }, []);
 
-  const handleDoubleOut: CheckboxProps["onChange"] = (e) => {
-    setDoubleOut(e.target.checked);
+  const handleCheckOutMode = (value : CheckOutMode) => {
+    setCheckOutMode(value);
   };
 
   const handleRandomStartingTeam: CheckboxProps["onChange"] = (e) => {
@@ -100,7 +100,6 @@ const GameSetup: FC<GameSetupProps> = ({ Close }) => {
       currentPlayerIndex: 0,
       wins: 0,
     };
-
     setTeams((prevTeams) => [...prevTeams, newTeam]);
   };
 
@@ -243,8 +242,10 @@ const GameSetup: FC<GameSetupProps> = ({ Close }) => {
       startingScore,
       randomStartingTeam,
       randomStartingPlayer,
-      doubleOut
+      checkOutMode
     );
+
+    Close();
   };
   const ResetTeams = (): Team[] => {
     return teams.map((team) => ({
@@ -291,6 +292,18 @@ const GameSetup: FC<GameSetupProps> = ({ Close }) => {
 
             <div>
               <label className="block text-white text-sm mb-2">
+                Checkout mode
+              </label>
+              <Segmented
+                options={["Simple", "Double", "Triple"]}
+                onChange={(value) => handleCheckOutMode(value as CheckOutMode)}
+                defaultValue="Simple"
+                value={checkOutMode}
+              />
+            </div>
+
+            <div>
+              <label className="block text-white text-sm mb-2">
                 Kezdő pontszám
               </label>
               <InputNumber
@@ -304,14 +317,6 @@ const GameSetup: FC<GameSetupProps> = ({ Close }) => {
 
           {/* Opciók */}
           <div className="mt-4 flex justify-center gap-4">
-            <Checkbox
-              className="text-white"
-              checked={doubleOut}
-              onChange={handleDoubleOut}
-            >
-              Double out
-            </Checkbox>
-
             <Checkbox
               className="text-white"
               checked={randomStartingTeam}
@@ -334,8 +339,8 @@ const GameSetup: FC<GameSetupProps> = ({ Close }) => {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-white text-lg font-semibold">Csapatok</h2>
-            <Button type="primary" onClick={AddTeam}>
-              + Csapat hozzáadása
+            <Button type="primary" onClick={() => {AddTeam(); AddEmptyPlayerToTeam(teams.length)}}>
+              + New Team
             </Button>
           </div>
 
@@ -388,7 +393,7 @@ const GameSetup: FC<GameSetupProps> = ({ Close }) => {
                     className="w-full border border-dashed border-primary text-color-primary hover:text-white hover:bg-primary-hover transition-all font-medium"
                     onClick={() => AddEmptyPlayerToTeam(teamIndex)}
                   >
-                    + Játékos hozzáadása
+                    + Add Player
                   </Button>
                 </div>
               </div>
@@ -399,7 +404,7 @@ const GameSetup: FC<GameSetupProps> = ({ Close }) => {
               <div className="text-center py-8 text-white/60">
                 <p className="mb-4">Még nincsenek csapatok hozzáadva</p>
                 <Button type="primary" onClick={AddFirstTeam}>
-                  Első csapat hozzáadása
+                  Add First team
                 </Button>
               </div>
             )}
@@ -409,7 +414,7 @@ const GameSetup: FC<GameSetupProps> = ({ Close }) => {
         {/* Akció gombok */}
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-700">
           <Button type="primary" size="large" onClick={handleSave}>
-            Kész
+            Start
           </Button>
         </div>
       </Form>

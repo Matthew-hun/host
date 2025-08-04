@@ -1,5 +1,5 @@
-import { Button, Input, message } from "antd";
-import React, { FC, useState } from "react";
+import { Button, Input, InputRef, message } from "antd";
+import React, { useRef, useState } from "react";
 import useMatch from "../hooks/MatchProvider";
 
 const ScoreInput = () => {
@@ -8,6 +8,9 @@ const ScoreInput = () => {
   const [disabled, setDisabled] = useState<boolean>(false);
 
   const [messageApi, contextHolder] = message.useMessage();
+
+  // AntD InputRef
+  const inputRef = useRef<InputRef>(null);
 
   const info = (message: string) => {
     messageApi.open({
@@ -22,6 +25,10 @@ const ScoreInput = () => {
       setDisabled(true);
       await NextRound(inputValue);
       setInputValue("");
+      // Fókusz visszaállítása a submit után
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
     } catch (error) {
       if (error instanceof Error) {
         info(error.message);
@@ -41,6 +48,7 @@ const ScoreInput = () => {
         {contextHolder}
 
         <Input
+          ref={inputRef}
           value={inputValue}
           onInput={(e: React.FormEvent<HTMLInputElement>) =>
             handleInputChange(e.currentTarget.value)

@@ -1,10 +1,12 @@
 import React, { FC } from "react";
 import { Team } from "../types/types";
 import useMatch from "../hooks/MatchProvider";
+import { Throw } from "@prisma/client";
 
 interface CheckOutProps {
   team: Team;
 }
+
 
 const CheckOut: FC<CheckOutProps> = ({ team }) => {
   const { teamId, name, players, currentPlayerIndex, wins } = team;
