@@ -1,26 +1,87 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+/*54e3c6*/
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-background: #2a2b3b;
+  --color-background-light: #3b3e52;
+  --color-primary: #10b981;
+  --color-placeholder: #dcddea;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* 🎨 Custom scrollbar */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-primary) var(--color-background-light);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--color-background-light);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--color-primary);
+    border-radius: 8px;
+    border: 2px solid var(--color-background-light);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-primary-hover);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+
+@theme {
+  --color-background: #2a2b3b;
+
+  --color-primary: #10b981;
+  --color-primary-dark: #4fbb86;
+  --color-primary-hover: #3c7d5e;
+  --color-primary-400: #2bbf87;
+  --color-primary-100: #e5f8ec;
+  --color-primary-200: #c8f1dc;
+
+  --color-secondary: #34b5a1;
+
+  --color-progress: #54e3c6;
+  --color-remainingProgress: #62748e;
 }
+
+/* Ant Design Select - teljes sötét dropdown */
+.ant-select-dropdown {
+  background-color: #1f2937 !important; /* Tailwind gray-800 */
+}
+
+.ant-select-item-option {
+  color: white !important;
+}
+
+.ant-select-item-option-active {
+  background-color: #374151 !important; /* Tailwind gray-700 */
+}
+
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.ant-notification-notice-message,
+.ant-notification-notice-description {
+  color: #000 !important;
+}
+

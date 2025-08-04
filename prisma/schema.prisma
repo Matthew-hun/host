@@ -1,0 +1,79 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Player {
+  id       Int     @id @default(autoincrement())
+  name     String
+  teamId   Int
+  team     Team    @relation(fields: [teamId], references: [id])
+  throws   Throw[]
+}
+
+model Team {
+  id                   Int      @id @default(autoincrement())
+  name                 String
+  currentPlayerIndex   Int
+  wins                 Int
+  players              Player[]
+  matches              MatchTeam[]
+  throws               Throw[]
+}
+
+model Match {
+  id                  Int         @id @default(autoincrement())
+  currentTeamIndex    Int
+  currentLegIndex     Int?
+  startingScore       Int
+  mode                String     // "First to" vagy "Best of"
+  maxLeg              Int
+  doubleOut           Boolean
+  randomStartingTeam  Boolean
+  randomStartingPlayer Boolean
+  legs                Leg[]
+  matchTeams          MatchTeam[]
+  throws              Throw[]
+}
+
+//?Kapcsoló tábla
+model MatchTeam {
+  id       Int    @id @default(autoincrement())
+  matchId  Int
+  teamId   Int
+
+  match    Match  @relation(fields: [matchId], references: [id])
+  team     Team   @relation(fields: [teamId], references: [id])
+}
+
+model Leg {
+  id          Int     @id @default(autoincrement())
+  matchId     Int
+  legIndex    Int
+  winnerTeamId Int?
+  isFinished  Boolean
+  throws      Throw[]
+
+  match       Match   @relation(fields: [matchId], references: [id])
+}
+
+model Throw {
+  id             Int     @id @default(autoincrement())
+  playerId       Int
+  teamId         Int
+  legId          Int
+  matchId        Int
+  score          Int
+  remainingScore Int
+
+  player         Player  @relation(fields: [playerId], references: [id])
+  team           Team    @relation(fields: [teamId], references: [id])
+  leg            Leg     @relation(fields: [legId], references: [id])
+  match          Match   @relation(fields: [matchId], references: [id])
+}
