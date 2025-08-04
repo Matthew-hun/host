@@ -12,16 +12,17 @@ const LegData = () => {
           </span>
         </div>
         <div className="bg-white/10 px-2 py-1 rounded text-sm font-medium text-white">
-          {match?.currentLegIndex! + 1} | {match?.matchSettings.maxLeg}
+          {typeof match?.currentLegIndex === "number" ? match.currentLegIndex + 1 : "-"}
+          | {match?.matchSettings.maxLeg}
         </div>
       </div>
       <div className="flex gap-1 mt-2 justify-center">
         {[...Array(match?.matchSettings.maxLeg)].map((_, i) => (
           <div
             key={i}
-            className={`w-5 h-1 rounded-full transition-all ${
-              i < match?.currentLegIndex! + 1 ? "bg-emerald-400" : "bg-white/30"
-            }`}
+            className={`w-5 h-1 rounded-full transition-all ${i < ((match?.currentLegIndex ?? -1) + 1) ? "bg-emerald-400" : "bg-white/30"
+              }`}
+
           />
         ))}
       </div>

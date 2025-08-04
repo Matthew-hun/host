@@ -17,8 +17,8 @@ const CheckOut: FC<CheckOutProps> = ({ team }) => {
       <ul>
         {possibleCheckOut
           .slice(Math.max(possibleCheckOut.length - 2, 0))
-          .map((checkOut) => {
-            return <li>{checkOut.join(" ")}</li>;
+          .map((checkOut, i) => {
+            return <li key={i}>{checkOut.join(" ")}</li>;
           })}
       </ul>
     </div>

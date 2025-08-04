@@ -30,10 +30,10 @@ const TeamCard: FC<TeamCardProps> = ({ team, teamIndex }) => {
       const matchAvg = CalculateMatchAvg(teamId);
       const remainingScore = GetRemainingScore(teamId);
 
-      const winsNeeded =
-        match?.matchSettings.mode === "First to"
-          ? match?.matchSettings.legs
-          : Math.floor(match?.matchSettings.legs! / 2) + 1;
+      const legs = match?.matchSettings.legs ?? 0;
+      const winsNeeded = match?.matchSettings.mode === "First to"
+        ? legs
+        : Math.floor(legs / 2) + 1;
 
       const progressPercent = winsNeeded ? (wins / winsNeeded) * 100 : 0;
 
@@ -50,10 +50,9 @@ const TeamCard: FC<TeamCardProps> = ({ team, teamIndex }) => {
   // Memoizált osztálynevek
   const cardClasses = useMemo(
     () =>
-      `${
-        isActiveTeam
-          ? "bg-gradient-to-br from-primary to-gray-800"
-          : "bg-white/10"
+      `${isActiveTeam
+        ? "bg-gradient-to-br from-primary to-gray-800"
+        : "bg-white/10"
       } relative flex flex-col items-center gap-4 p-5 rounded-xl min-w-80 cursor-pointer transition-all duration-300 hover:scale-[1.02]`,
     [isActiveTeam]
   );
@@ -62,34 +61,29 @@ const TeamCard: FC<TeamCardProps> = ({ team, teamIndex }) => {
     const baseIntensity = isActiveTeam ? 20 : 3;
     return [
       `absolute w-64 h-64 rounded-full blur-2xl animate-pulse bg-gradient-to-r from-primary/${baseIntensity} to-secondary/${baseIntensity}`,
-      `absolute w-56 h-56 rounded-full blur-xl animate-pulse delay-300 bg-gradient-to-r from-primary/${
-        baseIntensity + 5
+      `absolute w-56 h-56 rounded-full blur-xl animate-pulse delay-300 bg-gradient-to-r from-primary/${baseIntensity + 5
       } to-secondary/${baseIntensity + 5}`,
-      `absolute w-48 h-48 rounded-full blur-lg animate-pulse delay-150 bg-gradient-to-r from-primary/${
-        baseIntensity + 10
+      `absolute w-48 h-48 rounded-full blur-lg animate-pulse delay-150 bg-gradient-to-r from-primary/${baseIntensity + 10
       } to-secondary/${baseIntensity + 10}`,
-      `absolute w-44 h-44 rounded-full blur-md animate-pulse delay-500 bg-gradient-to-r from-primary/${
-        baseIntensity + 15
+      `absolute w-44 h-44 rounded-full blur-md animate-pulse delay-500 bg-gradient-to-r from-primary/${baseIntensity + 15
       } to-secondary/${baseIntensity + 15}`,
     ];
   }, [isActiveTeam]);
 
   const scoreCircleClasses = useMemo(
     () =>
-      `relative w-40 h-40 rounded-full bg-gradient-to-br from-gray-900 via-black to-gray-900 shadow-2xl flex items-center justify-center z-10 transition-all duration-300 ${
-        isActiveTeam
-          ? "border-4 border-primary/60 shadow-primary/30"
-          : "border-4 border-primary/20"
+      `relative w-40 h-40 rounded-full bg-gradient-to-br from-gray-900 via-black to-gray-900 shadow-2xl flex items-center justify-center z-10 transition-all duration-300 ${isActiveTeam
+        ? "border-4 border-primary/60 shadow-primary/30"
+        : "border-4 border-primary/20"
       }`,
     [isActiveTeam]
   );
 
   const innerGlowClasses = useMemo(
     () =>
-      `absolute inset-2 rounded-full blur-sm ${
-        isActiveTeam
-          ? "bg-gradient-to-r from-primary/25 to-secondary/25"
-          : "bg-gradient-to-r from-primary/8 to-secondary/8"
+      `absolute inset-2 rounded-full blur-sm ${isActiveTeam
+        ? "bg-gradient-to-r from-primary/25 to-secondary/25"
+        : "bg-gradient-to-r from-primary/8 to-secondary/8"
       }`,
     [isActiveTeam]
   );
