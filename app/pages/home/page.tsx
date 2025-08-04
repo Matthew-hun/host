@@ -238,7 +238,7 @@ export default function Home() {
 
           <div id="Teams" className="flex items-stretch gap-5">
             {match?.teams.map((team, teamIndex) => {
-              return <TeamCard team={team} teamIndex={teamIndex} />;
+              return <TeamCard team={team} teamIndex={teamIndex} key={teamIndex}/>;
             })}
           </div>
 
