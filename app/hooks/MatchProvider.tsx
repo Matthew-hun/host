@@ -94,47 +94,47 @@ export default function useMatch() {
     if (!match || match.currentLegIndex === undefined) return;
 
     const regex = /^(0|[1-9][0-9]{0,2})$/;
+    const score = Number(inputScore);
+    const remaining = GetRemainingScore(match.currentTeamIndex);
 
     if (!regex.test(inputScore)) {
       throw new Error("Please provide a valid score");
-    } else if (Number(inputScore) < 0 || Number(inputScore) > 180) {
+    } else if (score < 0 || score > 180) {
       throw new Error("Please input a score between 0 and 180");
-    } else if (Number(inputScore) === 179) {
+    } else if (score === 179) {
       throw new Error("You can't score 179");
-    } else if (Number(inputScore) > GetRemainingScore(match.currentTeamIndex)) {
-      throw new Error("No");
-    } else {
-      const score = Number(inputScore) || 0;
+    } else if (remaining === undefined) {
+      return;
+    } else if (score > remaining) {
+      throw new Error("You can't score more than remaining points");
+    }
 
-      const currentTeam = match.teams[match.currentTeamIndex];
-      const remaining = GetRemainingScore(match.currentTeamIndex);
+    const currentTeam = match.teams[match.currentTeamIndex];
 
-      if (remaining === undefined) return;
+    if (IsMatchOver()) {
+      Over();
+      return;
+    }
+
+    if (IsLegOver(score)) {
+      currentTeam.wins++;
+
+      const dobasokSzama = await GetThrownDartsToCheckOut();
+      AddThrownDartsToCheckOut(dobasokSzama);
 
       if (IsMatchOver()) {
+        saveMatch({ ...match });
         Over();
         return;
       }
 
-      if (IsLegOver(score)) {
-        currentTeam.wins++;
-
-        const dobasokSzama = await GetThrownDartsToCheckOut();
-        AddThrownDartsToCheckOut(dobasokSzama);
-
-        if (IsMatchOver()) {
-          saveMatch({ ...match });
-          Over();
-          return;
-        }
-
-        NextLeg();
-      } else {
-        AddScore(score);
-        IncreaseTeamIndex();
-      }
+      NextLeg();
+    } else {
+      AddScore(score);
+      IncreaseTeamIndex();
     }
   };
+
 
   const IncreaseTeamIndex = () => {
     if (!match) return;
