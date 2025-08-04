@@ -101,6 +101,8 @@ export default function useMatch() {
       throw new Error("Please input a score between 0 and 180");
     } else if (Number(inputScore) === 179) {
       throw new Error("You can't score 179");
+    } else if (Number(inputScore) > GetRemainingScore(match.currentTeamIndex)) {
+      throw new Error("No");
     } else {
       const score = Number(inputScore) || 0;
 
