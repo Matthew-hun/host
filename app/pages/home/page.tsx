@@ -91,10 +91,11 @@ export default function Home() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
+
       const isInput =
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        (target as any).isContentEditable;
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target.isContentEditable;
 
       if (!isInput && e.key === "Backspace") {
         try {
@@ -109,7 +110,7 @@ export default function Home() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [match]);
+  }, [RemoveScore, openNotification]);
 
   return (
     <ConfigProvider
@@ -197,7 +198,7 @@ export default function Home() {
           <Button key="cancle" onClick={handleCancelNextMatch}>
             Cancel
           </Button>,
-           <Button key="ok" type="primary" onClick={handleOkNextMatch}>
+          <Button key="ok" type="primary" onClick={handleOkNextMatch}>
             Next match
           </Button>,
         ]}

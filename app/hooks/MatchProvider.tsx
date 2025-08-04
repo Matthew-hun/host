@@ -347,9 +347,9 @@ export default function useMatch() {
     const updatedTeam: Team[] = match.teams.map((team, idx) => {
       return idx == teamIndex
         ? {
-            ...team,
-            currentPlayerIndex: playerIndex,
-          }
+          ...team,
+          currentPlayerIndex: playerIndex,
+        }
         : team;
     });
 
@@ -496,18 +496,20 @@ export default function useMatch() {
   };
 
   const GetRemainingScore = (teamIndex: number): number => {
-    if (!match || match.currentLegIndex === undefined)
-      return match?.matchSettings.startingScore!;
+    if (!match || match.currentLegIndex === undefined) {
+      throw new Error("Match or current leg is undefined.");
+    }
 
-    let totalScore = 0;
-    match.legs[match.currentLegIndex].legScoreHistory.forEach((score) => {
-      if (score.teamId == teamIndex) {
-        totalScore += Number(score.score);
-      }
-    });
+    const { matchSettings, legs, currentLegIndex } = match;
 
-    return match.matchSettings.startingScore - totalScore;
+    const legScoreHistory = legs[currentLegIndex].legScoreHistory;
+    const totalScore = legScoreHistory
+      .filter((score) => score.teamId === teamIndex)
+      .reduce((sum, score) => sum + Number(score.score), 0);
+
+    return matchSettings.startingScore - totalScore;
   };
+
 
   const saveMatch = (updated: Match) => {
     setMatch({ ...updated });
