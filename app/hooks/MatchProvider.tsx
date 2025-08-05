@@ -1,7 +1,16 @@
 // src/context/MatchContext.tsx
 "use client";
 import React, { createContext, useContext, useState } from "react";
-import { CheckOutMode, CheckOutThrow, Leg, Match, Team, Throw } from "../types/types";
+import {
+  CheckOutMode,
+  CheckOutThrow,
+  Dart,
+  Leg,
+  Match,
+  Player,
+  Team,
+  Throw,
+} from "../types/types";
 
 type MatchContextType = {
   match: Match | null;
@@ -17,7 +26,6 @@ const MatchContext = createContext<MatchContextType | undefined>(undefined);
 export const MatchProvider = ({ children }: { children: React.ReactNode }) => {
   const [match, setMatch] = useState<Match | null>(null);
   const [isRunning, setIsRunning] = useState(false);
-
 
   return (
     <MatchContext.Provider value={{ match, setMatch, isRunning, setIsRunning }}>
@@ -41,7 +49,7 @@ export default function useMatch() {
     startingScore: number,
     randomStartingTeam: boolean,
     randomStartingPlayer: boolean,
-    checkOutMode: CheckOutMode,
+    checkOutMode: CheckOutMode
   ) => {
     // Biztosítsuk, hogy a csapatok teljesen tiszták legyenek
     const cleanTeams: Team[] = teams.map((team, index) => ({
@@ -354,9 +362,9 @@ export default function useMatch() {
     const updatedTeam: Team[] = match.teams.map((team, idx) => {
       return idx == teamIndex
         ? {
-          ...team,
-          currentPlayerIndex: playerIndex,
-        }
+            ...team,
+            currentPlayerIndex: playerIndex,
+          }
         : team;
     });
 
@@ -502,33 +510,70 @@ export default function useMatch() {
     return uniqueResults;
   };
 
-  // const GetCheckOuts2 = (remainingScore: number): [] => {
-  //   if (!match) return [];
-  //   if (remainingScore > 170) return [];
-  //   switch (match.matchSettings.checkOutMode) {
-  //     case 'Simple':
-  //       return GetCheckOutSimple(remainingScore);
-  //     case 'Double':
-  //       return GetCheckOutDouble(remainingScore);
-  //     case 'Triple':
-  //       return GetCheckOutTriple(remainingScore);
-  //     default:
-  //       return [];
-  //   }
-  // }
+  const GetCheckOuts2 = (remainingScore: number): Set<Dart[]> => {
+    if (!match) new Set<Dart[]>();
+    if (remainingScore > 170) new Set<Dart[]>();
 
-  // const GetCheckOutSimple = (remainingScore: number): [] => {
+    enum types {
+      Simple = "Simple",
+      Double = "Double",
+      Triple = "Triple",
+    }
 
-  //   return [];
-  // }
-  // const GetCheckOutDouble = (remainingScore: number): [] => {
+    const darts: Dart[] = [];
+    darts.push({ label: "D25", value: 50, type: types.Double });
+    darts.push({ label: "25", value: 25, type: types.Simple });
 
-  //   return [];
-  // }
-  // const GetCheckOutTriple = (remainingScore: number): [] => {
+    for (let i = 20; i >= 1; i--) {
+      darts.push({ label: `T${i}`, value: i * 3, type: types.Triple });
+      darts.push({ label: `D${i}`, value: i * 2, type: types.Double });
+      darts.push({ label: `${i}`, value: i, type: types.Simple });
+    }
 
-  //   return [];
-  // }
+    console.log(darts);
+
+    const results = new Set<Dart[]>();
+
+    // One dart
+    darts.forEach((d1) => {
+      d1.type == match?.matchSettings.checkOutMode && d1.value == remainingScore
+        ? results.add([d1])
+        : null;
+    });
+
+    // Two darts
+    darts.forEach((d1) =>
+      darts.forEach((d2) => {
+        d2.type == match?.matchSettings.checkOutMode &&
+        d1.value + d2.value == remainingScore
+          ? results.add([d1, d2])
+          : null;
+      })
+    );
+
+    // Three darts
+    darts.forEach((d1) =>
+      darts.forEach((d2) =>
+        darts.forEach((d3) => {
+          d3.type == match?.matchSettings.checkOutMode &&
+          d1.value + d2.value + d3.value == remainingScore
+            ? results.add([d1, d2, d3])
+            : null;
+        })
+      )
+    );
+
+    //Change D25 to Bull
+    const updatedResults = new Set<Dart[]>();
+    results.forEach((combo) => {
+      const updatedCombo = combo.map((dart) =>
+        dart.label === "D25" ? { ...dart, label: "Bull" } : dart
+      );
+      updatedResults.add(updatedCombo);
+    });
+
+    return updatedResults;
+  };
 
   const GetRemainingScore = (teamIndex: number): number => {
     if (!match || match.currentLegIndex === undefined) {
@@ -551,7 +596,23 @@ export default function useMatch() {
     localStorage.setItem("match", JSON.stringify(updated));
   };
 
-  const BiggestScorePlayer = () => {
+  const BiggestMatchScorePlayer = () => {
+    if (!match) return null;
+
+    let maxThrow: Throw | null = null;
+
+    for (const leg of match.legs) {
+      for (const throwItem of leg.legScoreHistory) {
+        if (!maxThrow || throwItem.score > maxThrow.score) {
+          maxThrow = throwItem;
+        }
+      }
+    }
+
+    return maxThrow;
+  };
+
+  const BiggestLegScorePlayer = () => {
     if (
       !match ||
       match.currentLegIndex === undefined ||
@@ -587,10 +648,14 @@ export default function useMatch() {
   };
 
   const GetPlayerScores = (teamIndex: number, playerIndex: number | null) => {
-    if (!match || match.currentLegIndex === undefined || playerIndex === null) return;
+    if (!match || match.currentLegIndex === undefined || playerIndex === null)
+      return;
 
-    return match.legs[match.currentLegIndex].legScoreHistory.filter((score) => score.teamId == teamIndex && score.playerId.playerId == playerIndex);
-  }
+    return match.legs[match.currentLegIndex].legScoreHistory.filter(
+      (score) =>
+        score.teamId == teamIndex && score.playerId.playerId == playerIndex
+    );
+  };
 
   return {
     match,
@@ -608,9 +673,11 @@ export default function useMatch() {
     GetScoreHistory,
     GetCheckOuts,
     GetRemainingScore,
-    BiggestScorePlayer,
+    BiggestLegScorePlayer,
+    BiggestMatchScorePlayer,
     GetThrownDartsToCheckOut,
     GetPlayerScores,
     GetWinner,
+    GetCheckOuts2,
   };
 }

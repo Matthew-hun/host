@@ -17,7 +17,8 @@ import StopWatch from "@/app/components/StopWatch";
 
 export default function Home() {
   const matchManager = useMatch();
-  const { match, isRunning, RemoveScore, CreateMatch } = matchManager;
+  const { match, isRunning, RemoveScore, CreateMatch, GetCheckOuts2 } = matchManager;
+  const a = GetCheckOuts2(34);
   const [openDrawer, setOpenDrawer] = useState(false);
 
   const showDrawer = () => {

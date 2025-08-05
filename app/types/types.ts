@@ -53,6 +53,11 @@ export type Match = {
 export type CheckOutMode = 'Simple' | 'Double' | 'Triple';
 
 export type CheckOutThrow = {
-  score: number,
-  type: CheckOutMode,
+  checkOut: [],
+}
+
+export type Dart = {
+  value: number;
+  type: CheckOutMode;
+  label: string;
 }
