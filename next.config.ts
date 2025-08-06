@@ -1,7 +1,7 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  assetPrefix: '/dartscorer.github.io/',
-  basePath: '/dartscorer.github.io',
+  // basePath és assetPrefix NEM KELL root domainhez!
   eslint: {
     ignoreDuringBuilds: true,
   },
