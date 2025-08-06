@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "predeploy": "next build",
-    "deploy": "gh-pages -d out"
-  },
+  "dev": "next dev",
+  "build": "next build",
+  "predeploy": "next build",
+  "deploy": "gh-pages -d out"
+}
+,
   "dependencies": {
     "@hookform/resolvers": "^5.2.0",
     "@prisma/client": "^6.13.0",
