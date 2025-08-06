@@ -17,7 +17,7 @@ const ScoreHistory: FC<ScoreHistoryProps> = ({ teamIndex }) => {
   const [historyType, setHistoryType] = useState<ScoreHistoryType>("Leg");
 
   useEffect(() => {
-    let scores = GetScoreHistory(teamIndex, historyType);
+    const scores = GetScoreHistory(teamIndex, historyType);
     if (scores !== undefined) {
       const newScores = scores.map((score, id) => {
         return {
