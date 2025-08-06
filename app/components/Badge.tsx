@@ -8,7 +8,7 @@ import {
 type BadgeType = "legendary" | "epic" | "rare" | "common";
 
 export type BadgeProps = {
-  icon: React.ComponentType<any>;
+  icon: React.ElementType;
   label: string;
   desc: string;
   type: BadgeType;
