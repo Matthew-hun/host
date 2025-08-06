@@ -7,6 +7,7 @@ import CheckOut from "./CheckOut";
 import { FaCrown } from "react-icons/fa";
 import { Progress } from "antd";
 import TeamStatistics from "./TeamStatistics";
+import { FaArrowLeftLong } from "react-icons/fa6";
 
 interface TeamCardProps {
   team: Team;
@@ -70,7 +71,7 @@ const TeamCard: FC<TeamCardProps> = ({ team, teamIndex }) => {
       className={`${
         isActiveTeam
           ? "bg-gradient-to-br from-primary to-gray-800"
-          : "bg-white/10"
+          : "bg-slate-900"
       } relative flex flex-col items-center gap-6 p-8 rounded-2xl min-w-120 cursor-pointer transition-all duration-300 hover:scale-[1.02]`}
     >
       <div id="remainingScore" className="flex-1/2">
@@ -86,8 +87,8 @@ const TeamCard: FC<TeamCardProps> = ({ team, teamIndex }) => {
             percent={progressPercent}
             showInfo={false}
             trailColor="transparent"
-            strokeWidth={10}
-            size={280}
+            strokeWidth={8}
+            size={265}
             className="absolute z-100"
           />
 
@@ -99,7 +100,7 @@ const TeamCard: FC<TeamCardProps> = ({ team, teamIndex }) => {
           {/* Rotating ring for active team - nagyobb */}
           {isActiveTeam && (
             <div
-              className="absolute w-74 h-74 rounded-full border-3 border-dashed border-primary-400/60 animate-spin"
+              className="absolute w-72 h-72 rounded-full border-3 border-dashed border-primary-400/60 animate-spin"
               style={{ animationDuration: "40s" }}
             />
           )}
@@ -129,7 +130,7 @@ const TeamCard: FC<TeamCardProps> = ({ team, teamIndex }) => {
       </div>
       <div
         id="info"
-        className="w-full h-full flex-1/2 flex flex-col items-center justify-end gap-4"
+        className="w-full h-full flex-1/2 flex flex-col items-center justify-between gap-4"
       >
         {/* Players */}
         <div className="w-full flex justify-center gap-3">
@@ -146,7 +147,6 @@ const TeamCard: FC<TeamCardProps> = ({ team, teamIndex }) => {
         {/* Statistics */}
         <TeamStatistics team={team} />
 
-        {/* Score History */}
         <ScoreHistory teamIndex={teamIndex} />
       </div>
     </div>

@@ -263,10 +263,6 @@ const GameSetup: FC<GameSetupProps> = ({Close}) => {
       <Form layout="vertical">
         {/* Játék beállítások szekció */}
         <div className="mb-6 p-4 rounded-xl bg-background-light border border-gray-700">
-          <h2 className="text-white text-lg font-semibold mb-4">
-            Játék beállítások
-          </h2>
-
           <div className="flex justify-center gap-4">
             <div>
               <label className="block text-white text-sm mb-2">Játék mód</label>

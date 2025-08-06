@@ -1,5 +1,12 @@
 "use client";
-import { ConfigProvider, Modal, Drawer, notification, Segmented, Button } from "antd";
+import {
+  ConfigProvider,
+  Modal,
+  Drawer,
+  notification,
+  Segmented,
+  Button,
+} from "antd";
 import { createContext, useEffect, useMemo, useState } from "react";
 import useMatch from "../../hooks/MatchProvider";
 import Navbar from "../../components/Navbar";
@@ -17,7 +24,8 @@ import StopWatch from "@/app/components/StopWatch";
 
 export default function Home() {
   const matchManager = useMatch();
-  const { match, isRunning, RemoveScore, CreateMatch, GetCheckOuts2 } = matchManager;
+  const { match, isRunning, RemoveScore, CreateMatch, GetCheckOuts2 } =
+    matchManager;
   const a = GetCheckOuts2(34);
   const [openDrawer, setOpenDrawer] = useState(false);
 
@@ -53,7 +61,7 @@ export default function Home() {
       match?.matchSettings.startingScore,
       match?.matchSettings.randomStartingTeam,
       match?.matchSettings.randomStartingPlayer,
-      match?.matchSettings.checkOutMode,
+      match?.matchSettings.checkOutMode
     );
     setNextMatchOpen(false);
   };
@@ -165,31 +173,25 @@ export default function Home() {
           colorBgContainer: "var(--color-background-light)",
           colorTextPlaceholder: "var(--color-placeholder)",
           colorSuccess: "#fff",
-          colorBgElevated: "var(--color-background-light)",
+          colorBgElevated: "var(--color-background)",
+          colorBgBase: "var(--color-background-light)",
+          colorIcon: "#fff",
+          colorIconHover: "var(--color-primary-hover)",
         },
       }}
     >
       {contextHolder}
-      <Modal
+      <Drawer
         className="w-full"
-        footer={null}
+        placement="left"
         title="Game settings"
         closable={{ "aria-label": "Custom Close Button" }}
+        width="40%"
         open={isGameSettingsOpen}
-        onOk={handleOkGameSettings}
-        onCancel={handleCancelGameSettings}
-        style={{ top: 20 }}
-        width={{
-          xs: "90%",
-          sm: "80%",
-          md: "70%",
-          lg: "60%",
-          xl: "50%",
-          xxl: "40%",
-        }}
+        onClose={handleCancelGameSettings}
       >
         <GameSetup Close={handleOkGameSettings} />
-      </Modal>
+      </Drawer>
       <Modal
         className="w-full"
         title="Next Match"
@@ -213,40 +215,68 @@ export default function Home() {
         onClose={onCloseDrawer}
         open={openDrawer}
         size="large"
-        width="80%"
+        width="30%"
       >
         <MatchStats />
       </Drawer>
 
-      <div className="min-h-screen w-screen flex flex-col items-center bg-gradient-to-br from-gray-900 to-black p-4 overflow-hidden">
-        <Navbar />
+      <div className="min-h-screen w-screen flex flex-col items-center relative p-4 overflow-hidden">
+        {/* Statikus háttér */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900">
+          {/* Központosított körök */}
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-40 h-40 bg-emerald-500/15 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl"></div>
+          <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-purple-500/15 rounded-full blur-xl"></div>
+          <div className="absolute top-1/2 right-1/3 w-28 h-28 bg-cyan-500/15 rounded-full blur-xl"></div>
+          
+          {/* Szimmetrikus vonalak */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-gradient-to-b from-transparent via-emerald-500/20 to-transparent"></div>
+          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-px bg-gradient-to-r from-transparent via-blue-500/15 to-transparent"></div>
+          
+          {/* Központi geometriai formák */}
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-12 h-12 border border-emerald-500/20 rotate-45 rounded-sm"></div>
+          <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2 w-8 h-8 border border-blue-500/15 rotate-12 rounded-sm"></div>
+          
+          {/* Finom rácsminta */}
+          <div className="absolute inset-0 opacity-5" style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
 
-        <div
-          id="main"
-          className="w-fit h-fit flex flex-col items-center gap-4 text-white"
-        >
-          <div id="Other" className="w-full flex justify-between items-center">
-            <MdSettings
-              className="text-2xl text-emerald-500 cursor-pointer hover:text-emerald-600 transition-colors duration-200"
-              onClick={showGameSettings}
-            />
-            <LegData />
-            <div>
+        {/* Tartalom */}
+        <div className="relative z-10">
+          <Navbar />
+
+          <div
+            id="main"
+            className="w-fit h-fit flex flex-col items-center gap-4 text-white"
+          >
+            <div
+              id="Other"
+              className="relative max-w-screen w-full flex justify-center items-center"
+            >
+              <MdSettings
+                className="absolute z-10 left-10 top-1/2 -translate-y-1/2 text-2xl text-emerald-500 cursor-pointer hover:text-emerald-600 transition-colors duration-200"
+                onClick={showGameSettings}
+              />
+              <LegData />
               <FiBarChart2
-                className="text-2xl text-emerald-500 mx-auto mb-2 cursor-pointer hover:text-emerald-600 transition-colors duration-200"
+                className="absolute z-10 right-10 top-1/2 -translate-y-1/2 text-2xl text-emerald-500 cursor-pointer hover:text-emerald-600 transition-colors duration-200"
                 onClick={showDrawer}
               />
             </div>
-          </div>
 
-          <div id="Teams" className="flex items-stretch gap-5">
-            {match?.teams.map((team, teamIndex) => {
-              return <TeamCard team={team} teamIndex={teamIndex} key={teamIndex} />;
-            })}
-          </div>
-
-          <div className="w-full flex justify-center">
-            <ScoreInput />
+            <div
+              id="Teams"
+              className={`flex1/${match?.teams} flex items-stretch gap-20`}
+            >
+              {match?.teams.map((team, teamIndex) => {
+                return (
+                  <TeamCard team={team} teamIndex={teamIndex} key={teamIndex} />
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

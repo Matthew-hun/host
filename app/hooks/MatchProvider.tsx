@@ -2,12 +2,15 @@
 "use client";
 import React, { createContext, useContext, useState } from "react";
 import {
+  CheckOut,
+  CheckOutDart,
   CheckOutMode,
   CheckOutThrow,
   Dart,
   Leg,
   Match,
   Player,
+  ScoreHistory,
   Team,
   Throw,
 } from "../types/types";
@@ -39,6 +42,423 @@ export default function useMatch() {
   if (!context) {
     throw new Error("useMatch must be used within a MatchProvider");
   }
+
+  const checkoutTable: CheckOut[] = [
+    {
+      remainingScore: 170,
+      dart: { dart: ["T20", "T20", "BIKE"] },
+      isValid: false,
+    },
+    { remainingScore: 169, dart: { dart: [] }, isValid: false },
+    { remainingScore: 168, dart: { dart: [] }, isValid: false },
+    {
+      remainingScore: 167,
+      dart: { dart: ["T20", "T19", "BIKE"] },
+      isValid: false,
+    },
+    { remainingScore: 166, dart: { dart: [] }, isValid: false },
+    { remainingScore: 165, dart: { dart: [] }, isValid: false },
+    {
+      remainingScore: 164,
+      dart: { dart: ["T20", "T18", "BIKE"] },
+      isValid: false,
+    },
+    { remainingScore: 163, dart: { dart: [] }, isValid: false },
+    { remainingScore: 162, dart: { dart: [] }, isValid: false },
+    {
+      remainingScore: 161,
+      dart: { dart: ["T20", "T17", "BIKE"] },
+      isValid: false,
+    },
+    {
+      remainingScore: 160,
+      dart: { dart: ["T20", "T20", "D20"] },
+      isValid: true,
+    },
+    { remainingScore: 159, dart: { dart: [] }, isValid: false },
+    {
+      remainingScore: 158,
+      dart: { dart: ["T20", "T20", "D19"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 157,
+      dart: { dart: ["T20", "T19", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 156,
+      dart: { dart: ["T20", "T20", "D18"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 155,
+      dart: { dart: ["T20", "T19", "D19"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 154,
+      dart: { dart: ["T20", "T18", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 153,
+      dart: { dart: ["T20", "T19", "D18"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 152,
+      dart: { dart: ["T20", "T20", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 151,
+      dart: { dart: ["T20", "T17", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 150,
+      dart: { dart: ["T20", "T18", "D18"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 149,
+      dart: { dart: ["T20", "T19", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 148,
+      dart: { dart: ["T20", "T16", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 147,
+      dart: { dart: ["T20", "T17", "D18"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 146,
+      dart: { dart: ["T20", "T18", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 145,
+      dart: { dart: ["T20", "T15", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 144,
+      dart: { dart: ["T20", "T20", "D12"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 143,
+      dart: { dart: ["T20", "T17", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 142,
+      dart: { dart: ["T20", "T14", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 141,
+      dart: { dart: ["T20", "T19", "D12"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 140,
+      dart: { dart: ["T20", "T16", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 139,
+      dart: { dart: ["T19", "T14", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 138,
+      dart: { dart: ["T20", "T18", "D12"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 137,
+      dart: { dart: ["T19", "T16", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 136,
+      dart: { dart: ["T20", "T20", "D8"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 135,
+      dart: { dart: ["T20", "T17", "D12"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 134,
+      dart: { dart: ["T20", "T14", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 133,
+      dart: { dart: ["T20", "T19", "D8"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 132,
+      dart: { dart: ["T20", "T16", "D12"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 131,
+      dart: { dart: ["T20", "T13", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 130,
+      dart: { dart: ["T20", "T20", "D5"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 129,
+      dart: { dart: ["T19", "T16", "D12"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 128,
+      dart: { dart: ["T18", "T14", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 127,
+      dart: { dart: ["T20", "T17", "D8"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 126,
+      dart: { dart: ["T19", "T19", "D6"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 125,
+      dart: { dart: ["25", "T20", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 124,
+      dart: { dart: ["T20", "T16", "D8"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 123,
+      dart: { dart: ["T19", "T16", "D9"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 122,
+      dart: { dart: ["T18", "T20", "D4"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 121,
+      dart: { dart: ["T17", "T10", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 120,
+      dart: { dart: ["T20", "20", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 119,
+      dart: { dart: ["T19", "T10", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 118,
+      dart: { dart: ["T20", "18", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 117,
+      dart: { dart: ["T20", "17", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 116,
+      dart: { dart: ["T20", "16", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 115,
+      dart: { dart: ["T20", "15", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 114,
+      dart: { dart: ["T20", "14", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 113,
+      dart: { dart: ["T20", "13", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 112,
+      dart: { dart: ["T20", "12", "D20"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 111,
+      dart: { dart: ["T20", "19", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 110,
+      dart: { dart: ["T20", "18", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 109,
+      dart: { dart: ["T19", "20", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 108,
+      dart: { dart: ["T20", "16", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 107,
+      dart: { dart: ["T19", "18", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 106,
+      dart: { dart: ["T20", "14", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 105,
+      dart: { dart: ["T19", "16", "D16"] },
+      isValid: true,
+    },
+    {
+      remainingScore: 104,
+      dart: { dart: ["T18", "18", "D16"] },
+      isValid: true,
+    },
+    { remainingScore: 103, dart: { dart: ["T20", "3", "D20"] }, isValid: true },
+    {
+      remainingScore: 102,
+      dart: { dart: ["T20", "10", "D16"] },
+      isValid: true,
+    },
+    { remainingScore: 101, dart: { dart: ["T20", "1", "D20"] }, isValid: true },
+    { remainingScore: 100, dart: { dart: ["T20", "D20"] }, isValid: true },
+    { remainingScore: 99, dart: { dart: ["T19", "10", "D16"] }, isValid: true },
+    { remainingScore: 98, dart: { dart: ["T20", "D19"] }, isValid: true },
+    { remainingScore: 97, dart: { dart: ["T19", "D20"] }, isValid: true },
+    { remainingScore: 96, dart: { dart: ["T20", "D18"] }, isValid: true },
+    { remainingScore: 95, dart: { dart: ["T19", "D19"] }, isValid: true },
+    { remainingScore: 94, dart: { dart: ["T18", "D20"] }, isValid: true },
+    { remainingScore: 93, dart: { dart: ["T19", "D18"] }, isValid: true },
+    { remainingScore: 92, dart: { dart: ["T20", "D16"] }, isValid: true },
+    { remainingScore: 91, dart: { dart: ["T17", "D20"] }, isValid: true },
+    { remainingScore: 90, dart: { dart: ["T20", "D15"] }, isValid: true },
+    { remainingScore: 89, dart: { dart: ["T19", "D16"] }, isValid: true },
+    { remainingScore: 88, dart: { dart: ["T16", "D20"] }, isValid: true },
+    { remainingScore: 87, dart: { dart: ["T17", "D18"] }, isValid: true },
+    { remainingScore: 86, dart: { dart: ["T18", "D16"] }, isValid: true },
+    { remainingScore: 85, dart: { dart: ["T15", "D20"] }, isValid: true },
+    { remainingScore: 84, dart: { dart: ["T20", "D12"] }, isValid: true },
+    { remainingScore: 83, dart: { dart: ["T17", "D16"] }, isValid: true },
+    { remainingScore: 82, dart: { dart: ["T14", "D20"] }, isValid: true },
+    { remainingScore: 81, dart: { dart: ["T19", "D12"] }, isValid: true },
+    { remainingScore: 80, dart: { dart: ["T20", "D10"] }, isValid: true },
+    { remainingScore: 79, dart: { dart: ["T19", "D11"] }, isValid: true },
+    { remainingScore: 78, dart: { dart: ["T18", "D12"] }, isValid: true },
+    { remainingScore: 77, dart: { dart: ["T19", "D10"] }, isValid: true },
+    { remainingScore: 76, dart: { dart: ["T20", "D8"] }, isValid: true },
+    { remainingScore: 75, dart: { dart: ["T17", "D12"] }, isValid: true },
+    { remainingScore: 74, dart: { dart: ["T14", "D16"] }, isValid: true },
+    { remainingScore: 73, dart: { dart: ["T19", "D8"] }, isValid: true },
+    { remainingScore: 72, dart: { dart: ["T16", "D12"] }, isValid: true },
+    { remainingScore: 71, dart: { dart: ["T13", "D16"] }, isValid: true },
+    { remainingScore: 70, dart: { dart: ["T10", "D20"] }, isValid: true },
+    { remainingScore: 69, dart: { dart: ["T15", "D12"] }, isValid: true },
+    { remainingScore: 68, dart: { dart: ["T20", "D4"] }, isValid: true },
+    { remainingScore: 67, dart: { dart: ["T17", "D8"] }, isValid: true },
+    { remainingScore: 66, dart: { dart: ["T10", "D18"] }, isValid: true },
+    { remainingScore: 65, dart: { dart: ["T19", "D4"] }, isValid: true },
+    { remainingScore: 64, dart: { dart: ["T16", "D8"] }, isValid: true },
+    { remainingScore: 63, dart: { dart: ["T13", "D12"] }, isValid: true },
+    { remainingScore: 62, dart: { dart: ["T10", "D16"] }, isValid: true },
+    { remainingScore: 61, dart: { dart: ["T15", "D8"] }, isValid: true },
+    { remainingScore: 60, dart: { dart: ["20", "D20"] }, isValid: true },
+    { remainingScore: 59, dart: { dart: ["19", "D20"] }, isValid: true },
+    { remainingScore: 58, dart: { dart: ["18", "D20"] }, isValid: true },
+    { remainingScore: 57, dart: { dart: ["17", "D20"] }, isValid: true },
+    { remainingScore: 56, dart: { dart: ["16", "D20"] }, isValid: true },
+    { remainingScore: 55, dart: { dart: ["15", "D20"] }, isValid: true },
+    { remainingScore: 54, dart: { dart: ["14", "D20"] }, isValid: true },
+    { remainingScore: 53, dart: { dart: ["13", "D20"] }, isValid: true },
+    { remainingScore: 52, dart: { dart: ["20", "D16"] }, isValid: true },
+    { remainingScore: 51, dart: { dart: ["19", "D16"] }, isValid: true },
+    { remainingScore: 50, dart: { dart: ["18", "D16"] }, isValid: true },
+    { remainingScore: 50, dart: { dart: ["Bull"] }, isValid: true },
+    { remainingScore: 49, dart: { dart: ["17", "D16"] }, isValid: true },
+    { remainingScore: 48, dart: { dart: ["16", "D16"] }, isValid: true },
+    { remainingScore: 47, dart: { dart: ["15", "D16"] }, isValid: true },
+    { remainingScore: 46, dart: { dart: ["14", "D16"] }, isValid: true },
+    { remainingScore: 45, dart: { dart: ["13", "D16"] }, isValid: true },
+    { remainingScore: 44, dart: { dart: ["12", "D16"] }, isValid: true },
+    { remainingScore: 43, dart: { dart: ["11", "D16"] }, isValid: true },
+    { remainingScore: 42, dart: { dart: ["10", "D16"] }, isValid: true },
+    { remainingScore: 41, dart: { dart: ["9", "D16"] }, isValid: true },
+    { remainingScore: 40, dart: { dart: ["D20"] }, isValid: true },
+    { remainingScore: 39, dart: { dart: ["S7", "D16"] }, isValid: true },
+    { remainingScore: 38, dart: { dart: ["D19"] }, isValid: true },
+    { remainingScore: 37, dart: { dart: ["S5", "D16"] }, isValid: true },
+    { remainingScore: 36, dart: { dart: ["D18"] }, isValid: true },
+    { remainingScore: 35, dart: { dart: ["S3", "D16"] }, isValid: true },
+    { remainingScore: 34, dart: { dart: ["D17"] }, isValid: true },
+    { remainingScore: 33, dart: { dart: ["S1", "D16"] }, isValid: true },
+    { remainingScore: 32, dart: { dart: ["D16"] }, isValid: true },
+    { remainingScore: 31, dart: { dart: ["S15", "D8"] }, isValid: true },
+    { remainingScore: 30, dart: { dart: ["D15"] }, isValid: true },
+    { remainingScore: 29, dart: { dart: ["S13", "D8"] }, isValid: true },
+    { remainingScore: 28, dart: { dart: ["D14"] }, isValid: true },
+    { remainingScore: 27, dart: { dart: ["S11", "D8"] }, isValid: true },
+    { remainingScore: 26, dart: { dart: ["D13"] }, isValid: true },
+    { remainingScore: 25, dart: { dart: ["S9", "D8"] }, isValid: true },
+    { remainingScore: 24, dart: { dart: ["D12"] }, isValid: true },
+    { remainingScore: 23, dart: { dart: ["S7", "D8"] }, isValid: true },
+    { remainingScore: 22, dart: { dart: ["D11"] }, isValid: true },
+    { remainingScore: 21, dart: { dart: ["S5", "D8"] }, isValid: true },
+    { remainingScore: 20, dart: { dart: ["D10"] }, isValid: true },
+    { remainingScore: 19, dart: { dart: ["S3", "D8"] }, isValid: true },
+    { remainingScore: 18, dart: { dart: ["D9"] }, isValid: true },
+    { remainingScore: 17, dart: { dart: ["S1", "D8"] }, isValid: true },
+    { remainingScore: 16, dart: { dart: ["D8"] }, isValid: true },
+    { remainingScore: 15, dart: { dart: ["S7", "D4"] }, isValid: true },
+    { remainingScore: 14, dart: { dart: ["D7"] }, isValid: true },
+    { remainingScore: 13, dart: { dart: ["S5", "D4"] }, isValid: true },
+    { remainingScore: 12, dart: { dart: ["D6"] }, isValid: true },
+    { remainingScore: 11, dart: { dart: ["S3", "D4"] }, isValid: true },
+    { remainingScore: 10, dart: { dart: ["D5"] }, isValid: true },
+    { remainingScore: 9, dart: { dart: ["S1", "D4"] }, isValid: true },
+    { remainingScore: 8, dart: { dart: ["D4"] }, isValid: true },
+    { remainingScore: 7, dart: { dart: ["S3", "D2"] }, isValid: true },
+    { remainingScore: 6, dart: { dart: ["D3"] }, isValid: true },
+    { remainingScore: 5, dart: { dart: ["S1", "D2"] }, isValid: true },
+    { remainingScore: 4, dart: { dart: ["D2"] }, isValid: true },
+    { remainingScore: 3, dart: { dart: ["S1", "D1"] }, isValid: true },
+    { remainingScore: 2, dart: { dart: ["D1"] }, isValid: true },
+  ];
 
   const { match, setMatch, isRunning, setIsRunning } = context;
 
@@ -265,8 +685,6 @@ export default function useMatch() {
       score: inputScore,
       remainingScore: previousRemaining - inputScore,
     });
-
-    GetScoreHistory(match.currentTeamIndex);
   };
 
   const NextLeg = () => {
@@ -295,12 +713,22 @@ export default function useMatch() {
       currentLegIndex: newLegIndex,
       currentTeamIndex: match.matchSettings.randomStartingTeam
         ? Math.floor(Math.random() * match.teams.length)
-        : 0,
+        : (match.currentTeamIndex + 1) % match.teams.length,
       teams: match.teams.map((team) => ({
         ...team,
         currentPlayerIndex: match.matchSettings.randomStartingPlayer
           ? Math.floor(Math.random() * team.players.length)
           : 0, // Új leg-nél visszaállítjuk az első játékosra
+
+        /*
+           currentPlayerIndex:
+          team.teamId === match.currentTeamIndex
+            ? match.matchSettings.randomStartingPlayer
+              ? Math.floor(Math.random() * team.players.length)
+              : (team.currentPlayerIndex + 1) % team.players.length
+            : team.currentPlayerIndex, // Csak a jelenlegi csapat játékos indexét növeljük, ha ő dob most
+      })),
+        */
       })),
     };
 
@@ -408,106 +836,27 @@ export default function useMatch() {
     return Math.round(totalTeamScore / totalTeamThrows);
   };
 
-  const GetScoreHistory = (teamIndex: number) => {
+  const GetScoreHistory = (teamIndex: number, historyType: ScoreHistory) => {
     if (!match || match.currentLegIndex === undefined) return;
 
     const currentLeg = match.currentLegIndex;
-    const t = match.legs[currentLeg]?.legScoreHistory.filter(
-      (x) => x.teamId == teamIndex
-    );
 
-    return t;
+    switch (historyType) {
+      case "Leg":
+        return match.legs[currentLeg]?.legScoreHistory.filter(
+          (x) => x.teamId == teamIndex
+        );
+      case "Match":
+        return match.legs
+          .flatMap((leg) => leg.legScoreHistory)
+          .filter((x) => x.teamId == teamIndex);
+      default:
+        break;
+    }
   };
 
-  const GetCheckOuts = (score: number) => {
-    type Dart = string; // pl. "T20", "D20", "S5", "Bull"
-
-    if (score < 2 || score > 170) return [];
-
-    const singles = Array.from({ length: 20 }, (_, i) => i + 1);
-    const darts: Dart[] = [];
-
-    for (const n of singles) {
-      darts.push(`S${n}`);
-      darts.push(`D${n}`);
-      darts.push(`T${n}`);
-    }
-
-    darts.push("Bull"); // 50
-    darts.push("S25"); // 25
-    darts.push("D25"); // 50 (alternatív megnevezés, optional)
-
-    const dartValue = (dart: Dart): number => {
-      if (dart === "Bull" || dart === "D25") return 50;
-      if (dart === "S25") return 25;
-      const mult = dart[0];
-      const val = parseInt(dart.slice(1));
-      if (isNaN(val)) return 0;
-      switch (mult) {
-        case "S":
-          return val;
-        case "D":
-          return val * 2;
-        case "T":
-          return val * 3;
-        default:
-          return 0;
-      }
-    };
-
-    const isDouble = (dart: Dart) =>
-      dart.startsWith("D") || dart === "Bull" || dart === "D25";
-
-    const results: Dart[][] = [];
-
-    // 1 dart
-    for (const d1 of darts) {
-      if (dartValue(d1) === score && isDouble(d1)) {
-        results.push([d1]);
-      }
-    }
-
-    // 2 darts
-    for (const d1 of darts) {
-      for (const d2 of darts) {
-        const total = dartValue(d1) + dartValue(d2);
-        if (total === score && isDouble(d2)) {
-          results.push([d1, d2]);
-        }
-      }
-    }
-
-    // 3 darts
-    for (const d1 of darts) {
-      for (const d2 of darts) {
-        for (const d3 of darts) {
-          const total = dartValue(d1) + dartValue(d2) + dartValue(d3);
-          if (total === score && isDouble(d3)) {
-            results.push([d1, d2, d3]);
-          }
-        }
-      }
-    }
-
-    // DUPLIKÁCIÓK ELTÁVOLÍTÁSA
-    const normalizeDart = (dart: Dart): Dart =>
-      dart === "Bull" ? "D25" : dart;
-
-    const normalizeCombo = (combo: Dart[]): string =>
-      combo.map(normalizeDart).join(" ");
-
-    const seen = new Set<string>();
-    const uniqueResults: Dart[][] = [];
-
-    for (const combo of results) {
-      const key = normalizeCombo(combo);
-      if (!seen.has(key)) {
-        seen.add(key);
-        uniqueResults.push(combo);
-      }
-    }
-
-    return uniqueResults;
+  const GetCheckOuts = (score: number): CheckOutDart | undefined => {
+    return checkoutTable.find((x) => x.remainingScore === score)?.dart;
   };
 
   const GetCheckOuts2 = (remainingScore: number): Set<Dart[]> => {
@@ -657,6 +1006,39 @@ export default function useMatch() {
     );
   };
 
+  const CalculateMatchMileStones = (teamIndex: number, value: number) => {
+    if (!match || match.currentLegIndex === undefined) return 0;
+
+    switch (value) {
+      case 180:
+        return match.legs.flatMap((leg) =>
+          leg.legScoreHistory.filter(
+            (score) => score.teamId === teamIndex && score.score === value
+          )
+        ).length;
+      case 120:
+        return match.legs.flatMap((leg) =>
+          leg.legScoreHistory.filter(
+            (score) =>
+              score.teamId === teamIndex &&
+              score.score >= value &&
+              score.score < 180
+          )
+        ).length;
+      case 60:
+        return match.legs.flatMap((leg) =>
+          leg.legScoreHistory.filter(
+            (score) =>
+              score.teamId === teamIndex &&
+              score.score >= value &&
+              score.score < 110
+          )
+        ).length;
+      default:
+        return 0;
+    }
+  };
+
   return {
     match,
     setMatch,
@@ -679,5 +1061,6 @@ export default function useMatch() {
     GetPlayerScores,
     GetWinner,
     GetCheckOuts2,
+    CalculateMatchMileStones,
   };
 }

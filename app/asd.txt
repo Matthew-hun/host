@@ -1,4 +1,5 @@
 //!TODO
-- nem doouble out kiszálló
+- nem double out kiszálló
+- medals
 
 

@@ -1,16 +1,16 @@
-import { Button, Input, InputRef, message } from "antd";
+import { Button, message } from "antd";
 import React, { useRef, useState } from "react";
 import useMatch from "../hooks/MatchProvider";
 
 const ScoreInput = () => {
   const { match, NextRound, GetRemainingScore } = useMatch();
-  const [inputValue, setInputValue] = useState<string>("");
-  const [disabled, setDisabled] = useState<boolean>(false);
+  const [inputValue, setInputValue] = useState("");
+  const [disabled, setDisabled] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  // AntD InputRef
-  const inputRef = useRef<InputRef>(null);
+  // Native HTML input ref
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const info = (message: string) => {
     messageApi.open({
@@ -43,37 +43,24 @@ const ScoreInput = () => {
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 p-4 flex items-center gap-4 w-full max-w-md">
-      <div className="flex-1 relative">
-        {contextHolder}
-
-        <Input
-          ref={inputRef}
-          value={inputValue}
-          onInput={(e: React.FormEvent<HTMLInputElement>) =>
-            handleInputChange(e.currentTarget.value)
+    <div className="w-full flex items-center px-20 py-5">
+      {contextHolder}
+      
+      <input
+        ref={inputRef}
+        type="text"
+        value={inputValue}
+        onChange={(e) => handleInputChange(e.currentTarget.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleSubmit();
           }
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleSubmit();
-            }
-          }}
-          placeholder="Score"
-          size="large"
-          disabled={match?.isOver || disabled}
-          className="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white text-lg font-medium placeholder-white/50 focus:border-emerald-400 focus:bg-white/10 focus:outline-none transition-all backdrop-blur-sm"
-        />
-      </div>
-      <Button
-        type="primary"
-        className="bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/40 shadow-lg"
-        onClick={handleSubmit}
+        }}
+        placeholder="Score"
         disabled={match?.isOver || disabled}
-        loading={disabled}
-      >
-        Next
-      </Button>
+        className="w-full text-center font-bold flex-1 bg-transparent border-b-2 border-0 outline-none text-lg placeholder-gray-400 focus:border-b-2 focus:placeholder-gray-300 disabled:opacity-50 animate-pulse"
+      />
     </div>
   );
 };

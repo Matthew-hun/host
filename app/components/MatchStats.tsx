@@ -16,7 +16,7 @@ const MatchStats = () => {
   if (!match) return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+    <div className="flex flex-wrap gap-6 p-6">
       {match.teams.map((team, teamIndex) =>
         team.players.map((player, playerIndex) => {
           const scores = GetPlayerScores(teamIndex, player.playerId);
@@ -30,7 +30,7 @@ const MatchStats = () => {
                 {player.name} – {team.name}
               </h3>
 
-              <Table className="text-white text-sm">
+              <Table className="w-full text-white text-sm">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-emerald-400">Score</TableHead>
@@ -57,11 +57,6 @@ const MatchStats = () => {
           );
         })
       )}
-      <Statistic
-        title="Active"
-        value={11.28}
-        precision={2}
-      />
     </div>
   );
 };

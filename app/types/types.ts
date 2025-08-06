@@ -61,3 +61,15 @@ export type Dart = {
   type: CheckOutMode;
   label: string;
 }
+
+export type CheckOutDart = {
+  dart: string[];
+}
+
+export type CheckOut = {
+  remainingScore: number;
+  dart: CheckOutDart;
+  isValid: boolean;
+}
+
+export type ScoreHistory = 'Leg' | 'Match';
