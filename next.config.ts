@@ -1,6 +1,7 @@
 const nextConfig = {
   output: 'export',
-  assetPrefix: '/',
+  assetPrefix: '/dartscorer.github.io/',
+  basePath: '/dartscorer.github.io',
   eslint: {
     ignoreDuringBuilds: true,
   },
