@@ -33,15 +33,19 @@ const MatchStats = () => {
               <Table className="w-full text-white text-sm">
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="text-emerald-400">Leg Id</TableHead>
                     <TableHead className="text-emerald-400">Score</TableHead>
                     <TableHead className="text-emerald-400">Remaining</TableHead>
+                    <TableHead className="text-emerald-400">Thrown darts to checkout</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {scores?.map((score, scoreIndex) => (
                     <TableRow key={scoreIndex}>
+                      <TableCell>{score.legId + 1}</TableCell>
                       <TableCell>{score.score}</TableCell>
                       <TableCell>{score.remainingScore}</TableCell>
+                      <TableCell>{score.thrownDartsToCheckOut}</TableCell>
                     </TableRow>
                   ))}
                   {scores?.length === 0 && (

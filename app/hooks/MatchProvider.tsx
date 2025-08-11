@@ -1,6 +1,6 @@
 // src/context/MatchContext.tsx
 "use client";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useRef, useState } from "react";
 import {
   CheckOut,
   CheckOutDart,
@@ -10,6 +10,7 @@ import {
   Leg,
   Match,
   Player,
+  SavedMatch,
   ScoreHistory,
   Team,
   Throw,
@@ -20,6 +21,11 @@ type MatchContextType = {
   setMatch: (match: Match) => void;
   isRunning: boolean;
   setIsRunning: (value: boolean) => void;
+  isCheckOutTryOpen: boolean;
+  setIsCheckOutTryOpen: (value: boolean) => void;
+
+  waitForCheckoutDarts: () => Promise<number>;
+  provideCheckoutDarts: (darts: number) => void;
 };
 
 type Mode = "First to" | "Best of";
@@ -29,9 +35,27 @@ const MatchContext = createContext<MatchContextType | undefined>(undefined);
 export const MatchProvider = ({ children }: { children: React.ReactNode }) => {
   const [match, setMatch] = useState<Match | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [isCheckOutTryOpen, setIsCheckOutTryOpen] = useState<boolean>(false);
+
+
+  const checkoutResolveRef = useRef<((n: number) => void) | null>(null);
+
+  const waitForCheckoutDarts = () =>
+    new Promise<number>((resolve) => {
+      checkoutResolveRef.current = resolve;
+      setIsCheckOutTryOpen(true);
+    });
+
+  const provideCheckoutDarts = (darts: number) => {
+    checkoutResolveRef.current?.(darts);
+    checkoutResolveRef.current = null;
+    setIsCheckOutTryOpen(false);
+  };
 
   return (
-    <MatchContext.Provider value={{ match, setMatch, isRunning, setIsRunning }}>
+    <MatchContext.Provider value={{
+      match, setMatch, isRunning, setIsRunning, isCheckOutTryOpen, setIsCheckOutTryOpen, waitForCheckoutDarts, provideCheckoutDarts
+    }}>
       {children}
     </MatchContext.Provider>
   );
@@ -46,28 +70,28 @@ export default function useMatch() {
   const checkoutTable: CheckOut[] = [
     {
       remainingScore: 170,
-      dart: { dart: ["T20", "T20", "BIKE"] },
+      dart: { dart: ["T20", "T20", "BULL"] },
       isValid: false,
     },
     { remainingScore: 169, dart: { dart: [] }, isValid: false },
     { remainingScore: 168, dart: { dart: [] }, isValid: false },
     {
       remainingScore: 167,
-      dart: { dart: ["T20", "T19", "BIKE"] },
+      dart: { dart: ["T20", "T19", "BULL"] },
       isValid: false,
     },
     { remainingScore: 166, dart: { dart: [] }, isValid: false },
     { remainingScore: 165, dart: { dart: [] }, isValid: false },
     {
       remainingScore: 164,
-      dart: { dart: ["T20", "T18", "BIKE"] },
+      dart: { dart: ["T20", "T18", "BULL"] },
       isValid: false,
     },
     { remainingScore: 163, dart: { dart: [] }, isValid: false },
     { remainingScore: 162, dart: { dart: [] }, isValid: false },
     {
       remainingScore: 161,
-      dart: { dart: ["T20", "T17", "BIKE"] },
+      dart: { dart: ["T20", "T17", "BULL"] },
       isValid: false,
     },
     {
@@ -460,7 +484,7 @@ export default function useMatch() {
     { remainingScore: 2, dart: { dart: ["D1"] }, isValid: true },
   ];
 
-  const { match, setMatch, isRunning, setIsRunning } = context;
+  const { match, setMatch, isRunning, setIsRunning, isCheckOutTryOpen, setIsCheckOutTryOpen, waitForCheckoutDarts, provideCheckoutDarts } = context;
 
   const CreateMatch = (
     teams: Team[],
@@ -469,7 +493,8 @@ export default function useMatch() {
     startingScore: number,
     randomStartingTeam: boolean,
     randomStartingPlayer: boolean,
-    checkOutMode: CheckOutMode
+    checkOutMode: CheckOutMode,
+    badgeMode: boolean,
   ) => {
     // Biztosítsuk, hogy a csapatok teljesen tiszták legyenek
     const cleanTeams: Team[] = teams.map((team, index) => ({
@@ -497,7 +522,11 @@ export default function useMatch() {
       })
     );
 
+    const currentSavedMatches = localStorage.getItem("savedMatches");
+    const matchId = currentSavedMatches === null ? 1 : JSON.parse(currentSavedMatches).length + 1;
+
     const newMatch: Match = {
+      matchId: matchId,
       teams: cleanTeams,
       legs: generatedLegs,
       currentTeamIndex: randomStartingTeam
@@ -513,6 +542,7 @@ export default function useMatch() {
         checkOutMode: checkOutMode,
         randomStartingTeam: randomStartingTeam,
         randomStartingPlayer: randomStartingPlayer,
+        badgeMode: badgeMode,
       },
       winnerTeamIndex: undefined,
     };
@@ -526,9 +556,16 @@ export default function useMatch() {
   const NextRound = async (inputScore: string) => {
     if (!match || match.currentLegIndex === undefined) return;
 
-    const regex = /^(0|[1-9][0-9]{0,2})$/;
-    const score = Number(inputScore);
+    const regex = /R?(0|[1-9][0-9]{0,2})$/i;
+    let score = 0;
     const remaining = GetRemainingScore(match.currentTeamIndex);
+
+    if (inputScore.startsWith('R') || inputScore.startsWith('r')) {
+      score = remaining - Number(inputScore.slice(1, inputScore.length));
+      console.log("rem:", score);
+    } else {
+      score = Number(inputScore);
+    }
 
     if (!regex.test(inputScore) && inputScore !== "") {
       throw new Error("Please provide a valid score");
@@ -550,10 +587,9 @@ export default function useMatch() {
     }
 
     if (IsLegOver(score)) {
+      const thrownDartsToCheckOut = await waitForCheckoutDarts();
+      AddScore(score, thrownDartsToCheckOut);
       currentTeam.wins++;
-
-      const dobasokSzama = await GetThrownDartsToCheckOut();
-      AddThrownDartsToCheckOut(dobasokSzama);
 
       if (IsMatchOver()) {
         saveMatch({ ...match });
@@ -563,7 +599,12 @@ export default function useMatch() {
 
       NextLeg();
     } else {
-      AddScore(score);
+      if (remaining - score <= 170) {
+        const thrownDartsToCheckOut = await waitForCheckoutDarts();
+        AddScore(score, thrownDartsToCheckOut);
+      } else {
+        AddScore(score, 0);
+      }
       IncreaseTeamIndex();
     }
   };
@@ -663,7 +704,7 @@ export default function useMatch() {
     return GetRemainingScore(match.currentTeamIndex)! - inputScore === 0;
   };
 
-  const AddScore = (inputScore: number) => {
+  const AddScore = (inputScore: number, thrownDartsToCheckOut: number) => {
     if (!match || match.currentLegIndex === undefined) return;
 
     const currentLeg = match.legs[match.currentLegIndex];
@@ -684,6 +725,7 @@ export default function useMatch() {
       legId: currentLeg.legId,
       score: inputScore,
       remainingScore: previousRemaining - inputScore,
+      thrownDartsToCheckOut: thrownDartsToCheckOut,
     });
   };
 
@@ -716,19 +758,12 @@ export default function useMatch() {
         : (match.currentTeamIndex + 1) % match.teams.length,
       teams: match.teams.map((team) => ({
         ...team,
-        currentPlayerIndex: match.matchSettings.randomStartingPlayer
-          ? Math.floor(Math.random() * team.players.length)
-          : 0, // Új leg-nél visszaállítjuk az első játékosra
-
-        /*
-           currentPlayerIndex:
+        currentPlayerIndex:
           team.teamId === match.currentTeamIndex
             ? match.matchSettings.randomStartingPlayer
               ? Math.floor(Math.random() * team.players.length)
               : (team.currentPlayerIndex + 1) % team.players.length
-            : team.currentPlayerIndex, // Csak a jelenlegi csapat játékos indexét növeljük, ha ő dob most
-      })),
-        */
+            : team.currentPlayerIndex, // Csak a jelenlegi csapat játékos indexét növeljük, ha ő dob most        
       })),
     };
 
@@ -790,9 +825,9 @@ export default function useMatch() {
     const updatedTeam: Team[] = match.teams.map((team, idx) => {
       return idx == teamIndex
         ? {
-            ...team,
-            currentPlayerIndex: playerIndex,
-          }
+          ...team,
+          currentPlayerIndex: playerIndex,
+        }
         : team;
     });
 
@@ -879,8 +914,6 @@ export default function useMatch() {
       darts.push({ label: `${i}`, value: i, type: types.Simple });
     }
 
-    console.log(darts);
-
     const results = new Set<Dart[]>();
 
     // One dart
@@ -894,7 +927,7 @@ export default function useMatch() {
     darts.forEach((d1) =>
       darts.forEach((d2) => {
         d2.type == match?.matchSettings.checkOutMode &&
-        d1.value + d2.value == remainingScore
+          d1.value + d2.value == remainingScore
           ? results.add([d1, d2])
           : null;
       })
@@ -905,7 +938,7 @@ export default function useMatch() {
       darts.forEach((d2) =>
         darts.forEach((d3) => {
           d3.type == match?.matchSettings.checkOutMode &&
-          d1.value + d2.value + d3.value == remainingScore
+            d1.value + d2.value + d3.value == remainingScore
             ? results.add([d1, d2, d3])
             : null;
         })
@@ -973,10 +1006,11 @@ export default function useMatch() {
     );
   };
 
-  const GetThrownDartsToCheckOut = async (): Promise<number> => {
-    const result = prompt("Hány dobásból lett meg a leg?");
-    const parsed = Number(result);
-    return isNaN(parsed) ? 0 : parsed;
+  const GetThrownDartsToCheckOut = async (value: number): Promise<number> => {
+    // const result = prompt("Hány dobásból lett meg a leg?");
+    // const parsed = Number(result);
+    // return isNaN(parsed) ? 0 : parsed;
+    return value;
   };
 
   const AddThrownDartsToCheckOut = (value: number) => {
@@ -1000,10 +1034,9 @@ export default function useMatch() {
     if (!match || match.currentLegIndex === undefined || playerIndex === null)
       return;
 
-    return match.legs[match.currentLegIndex].legScoreHistory.filter(
-      (score) =>
-        score.teamId == teamIndex && score.playerId.playerId == playerIndex
-    );
+    return match?.legs.flatMap((leg) => leg.legScoreHistory.filter((score) =>
+      score.teamId == teamIndex && score.playerId.playerId == playerIndex
+    ));
   };
 
   const CalculateMatchMileStones = (teamIndex: number, value: number) => {
@@ -1039,6 +1072,60 @@ export default function useMatch() {
     }
   };
 
+  const CalculatePlayerLegAvg = (teamIndex: number, playerIndex: number) => {
+    if (!match || match.currentLegIndex) return;
+
+    let totalTeamScore: number = 0;
+    let totalTeamThrows: number = 0;
+    match.legs[match.currentLegIndex].legScoreHistory.forEach((score) => {
+      if (score.teamId == teamIndex && score.playerId.playerId == playerIndex) {
+        totalTeamThrows++;
+        totalTeamScore += Number(score.score);
+      }
+    });
+    return Math.round(totalTeamScore / totalTeamThrows);
+  }
+
+  const CalculatePlayerMatchAvg = (teamIndex: number, playerIndex: number) => {
+    if (!match) return;
+
+    let totalTeamScore: number = 0;
+    let totalTeamThrows: number = 0;
+    match.legs.flatMap((leg) => leg.legScoreHistory.map((score) => {
+      if (score.teamId == teamIndex && score.playerId.playerId == playerIndex) {
+        totalTeamThrows++;
+        totalTeamScore += Number(score.score);
+      }
+    }));
+    return Math.round(totalTeamScore / totalTeamThrows);
+  }
+
+  const CalculateCheckOutAvg = (teamIndex: number, playerIndex?: number) => {
+    if (!match) return;
+
+    let tries = 0;
+    let won = false;
+    match.legs.map((leg) => leg.legScoreHistory.map((score) => {
+      if (playerIndex) {
+        if (teamIndex == score.teamId && playerIndex == score.playerId.playerId) {
+          tries += score.thrownDartsToCheckOut;
+          if (score.remainingScore == 0) {
+            won = true;
+          }
+        }
+      } else {
+        if (teamIndex == score.teamId) {
+          tries += score.thrownDartsToCheckOut;
+          if (score.remainingScore == 0) {
+            won = true;
+          }
+        }
+      }
+    }));
+
+    return won ? (1 / tries) * 100 : 0;
+  }
+
   return {
     match,
     setMatch,
@@ -1062,5 +1149,11 @@ export default function useMatch() {
     GetWinner,
     GetCheckOuts2,
     CalculateMatchMileStones,
+    CalculatePlayerLegAvg,
+    CalculatePlayerMatchAvg,
+    isCheckOutTryOpen,
+    setIsCheckOutTryOpen,
+    provideCheckoutDarts,
+    CalculateCheckOutAvg
   };
 }

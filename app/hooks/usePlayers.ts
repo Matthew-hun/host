@@ -25,8 +25,9 @@ export default function usePlayers() {
     try {
       const regularPlayers = localStorage.getItem("regularPlayers");
       const items = regularPlayers ? JSON.parse(regularPlayers) : [];
-
-      if (items.includes(newPlayer)) {
+      if (newPlayer === null || newPlayer === undefined || newPlayer === "") {
+        alert("Adj meg egy nevet!");
+      } else if (items.includes(newPlayer)) {
         alert("Már létezik!");
       } else {
         items.push(newPlayer);

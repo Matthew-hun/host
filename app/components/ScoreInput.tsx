@@ -45,7 +45,7 @@ const ScoreInput = () => {
   return (
     <div className="w-full flex items-center px-20 py-5">
       {contextHolder}
-      
+
       <input
         ref={inputRef}
         type="text"
@@ -58,8 +58,9 @@ const ScoreInput = () => {
           }
         }}
         placeholder="Score"
+        pattern="[Rr]?(0|[1-9][0-9]{0,2})"
         disabled={match?.isOver || disabled}
-        className="w-full text-center font-bold flex-1 bg-transparent border-b-2 border-0 outline-none text-lg placeholder-gray-400 focus:border-b-2 focus:placeholder-gray-300 disabled:opacity-50 animate-pulse"
+        className="w-full text-center font-bold flex-1 bg-transparent border-b-2 border-0 outline-none text-lg placeholder-gray-400 invalid:border-rose-700 invalid:text-rose-700 focus:border-b-2 focus:placeholder-gray-300 disabled:opacity-50 animate-pulse"
       />
     </div>
   );

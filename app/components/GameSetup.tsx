@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
 import usePlayers from "../hooks/usePlayers";
-import { CheckOutMode, Leg, Match, Team } from "../types/types";
+import { CheckOutMode, Leg, Match, SavedMatch, Team } from "../types/types";
 import {
   Button,
   Form,
@@ -10,9 +10,10 @@ import {
   Segmented,
   InputNumber,
   Card,
+  Input,
 } from "antd";
 import useMatch from "../hooks/MatchProvider";
-import { IoClose } from "react-icons/io5";
+import { IoClose, IoAddCircle, IoPeople, IoSettings, IoPlay, IoSave, IoPersonAdd } from "react-icons/io5";
 import type { CheckboxProps } from "antd";
 
 const { Title } = Typography;
@@ -21,9 +22,10 @@ interface GameSetupProps {
   Close: () => void;
 }
 
-const GameSetup: FC<GameSetupProps> = ({Close}) => {
-  const maxLegLength = 5; // Maximum number of legs
-  const { players } = usePlayers();
+const GameSetup: FC<GameSetupProps> = ({ Close }) => {
+  const maxLegLength = 5;
+  const { players, newPlayer, setNewPlayer, AddPlayer } =
+    usePlayers();
   const [teams, setTeams] = useState<Team[]>([]);
   const { match, CreateMatch } = useMatch();
   const [playerOptions, setPlayerOptions] = useState<
@@ -34,9 +36,9 @@ const GameSetup: FC<GameSetupProps> = ({Close}) => {
   const [mode, setMode] = useState<"First to" | "Best of">("First to");
   const [startingScore, setStartingScore] = useState<number>(501);
   const [randomStartingTeam, setRandomStartingTeam] = useState<boolean>(false);
-  const [randomStartingPlayer, setRandomStartingPlayer] =
-    useState<boolean>(false);
+  const [randomStartingPlayer, setRandomStartingPlayer] = useState<boolean>(false);
   const [checkOutMode, setCheckOutMode] = useState<CheckOutMode>('Simple');
+  const [badgeMode, setBadgeMode] = useState<boolean>(false);
 
   useEffect(() => {
     const localStorageMatch = localStorage.getItem("match");
@@ -50,10 +52,11 @@ const GameSetup: FC<GameSetupProps> = ({Close}) => {
       setLegs(parsedMatch.matchSettings.legs);
       setRandomStartingTeam(parsedMatch.matchSettings.randomStartingTeam);
       setRandomStartingPlayer(parsedMatch.matchSettings.randomStartingPlayer);
+      setBadgeMode(parsedMatch.matchSettings.badgeMode);
     }
   }, []);
 
-  const handleCheckOutMode = (value : CheckOutMode) => {
+  const handleCheckOutMode = (value: CheckOutMode) => {
     setCheckOutMode(value);
   };
 
@@ -63,6 +66,10 @@ const GameSetup: FC<GameSetupProps> = ({Close}) => {
 
   const handleRandomStartingPlayer: CheckboxProps["onChange"] = (e) => {
     setRandomStartingPlayer(e.target.checked);
+  };
+
+  const handleBadgeMode: CheckboxProps["onChange"] = (e) => {
+    setBadgeMode(e.target.checked);
   };
 
   useEffect(() => {
@@ -120,8 +127,6 @@ const GameSetup: FC<GameSetupProps> = ({Close}) => {
       updatedTeams[teamIndex] = team;
       return updatedTeams;
     });
-
-    console.log("Updated Team:", teams[teamIndex]);
   };
 
   const AddEmptyPlayerToTeam = (teamIndex: number) => {
@@ -136,11 +141,9 @@ const GameSetup: FC<GameSetupProps> = ({Close}) => {
 
   const RemoveTeam = (teamIndex: number) => {
     setTeams((prevTeams) => {
-      // Törlés
       const updatedTeams = [...prevTeams];
       updatedTeams.splice(teamIndex, 1);
 
-      // Újrasorszámozás
       const renamedTeams = updatedTeams.map((team, index) => ({
         ...team,
         teamId: index,
@@ -156,64 +159,17 @@ const GameSetup: FC<GameSetupProps> = ({Close}) => {
       const updatedTeams = [...prevTeams];
       const team = { ...updatedTeams[teamIndex] };
 
-      // Játékosok másolása és törlés
       const updatedPlayers = [...team.players];
       updatedPlayers.splice(playerIndex, 1);
 
       team.players = updatedPlayers;
       updatedTeams[teamIndex] = team;
 
-      console.log(teams);
-
       return updatedTeams;
     });
   };
 
-  // const handleSave = () => {
-  //   console.log(teams);
-
-  //   if (teams.length == 0) {
-  //     alert("Please add atleast one Team!");
-  //     return;
-  //   } else {
-  //     teams.forEach((team) => {
-  //       if (team.players.length == 0) {
-  //         alert("Missing Player!");
-  //         return;
-  //       } else {
-  //         team.players.forEach((player) => {
-  //           if (player.name == "") {
-  //             alert("Select Player");
-  //             return;
-  //           } else {
-  //             const newMatch: Match = {
-  //               teams: ResetTeams(),
-  //               legs: AddNewLeg(),
-  //               currentTeamIndex: randomStartingTeam
-  //                 ? Math.floor(Math.random() * ResetTeams().length)
-  //                 : 0,
-  //               currentLegIndex: 0,
-  //               matchSettings: {
-  //                 mode: mode,
-  //                 startingScore: startingScore,
-  //                 maxLeg: legs,
-  //                 doubleOut: doubleOut,
-  //                 randomStartingTeam: randomStartingTeam,
-  //                 randomStartingPlayer: randomStartingPlayer,
-  //               },
-  //               isOver: false,
-  //               thrownDartsToCheckOut: null,
-  //             };
-  //             CreateMatch(newMatch);
-  //           }
-  //         });
-  //       }
-  //     });
-  //   }
-  // };
-
   const handleSave = () => {
-    // Validáció
     if (teams.length === 0) {
       alert("Please add at least one Team!");
       return;
@@ -232,21 +188,22 @@ const GameSetup: FC<GameSetupProps> = ({Close}) => {
       }
     }
 
-    // Csapatok resetelése az új meccshez
     const resetTeams = ResetTeams();
 
     CreateMatch(
-      resetTeams, // A resetelt csapatokat adjuk át
+      resetTeams,
       legs,
       mode,
       startingScore,
       randomStartingTeam,
       randomStartingPlayer,
-      checkOutMode
+      checkOutMode,
+      badgeMode,
     );
 
     Close();
   };
+
   const ResetTeams = (): Team[] => {
     return teams.map((team) => ({
       ...team,
@@ -259,161 +216,285 @@ const GameSetup: FC<GameSetupProps> = ({Close}) => {
   };
 
   return (
-    <div className="w-full max-h-[80vh] overflow-auto custom-scrollbar p-6">
-      <Form layout="vertical">
-        {/* Játék beállítások szekció */}
-        <div className="mb-6 p-4 rounded-xl bg-background-light border border-gray-700">
-          <div className="flex justify-center gap-4">
+    <div className="">
+      {/* Header */}
+      <div className="flex flex-col gap-4 max-w-6xl mx-auto mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/25">
+              <IoSettings className="text-white text-xl" />
+            </div>
             <div>
-              <label className="block text-white text-sm mb-2">Játék mód</label>
+              <h1 className="text-3xl font-bold text-white">Game Setup</h1>
+              <p className="text-slate-400">Configure your dart match</p>
+            </div>
+          </div>
+          <button
+            onClick={Close}
+            className="cursor-pointer w-10 h-10 bg-slate-700 hover:bg-slate-600 rounded-lg flex items-center justify-center text-slate-300 hover:text-white transition-all duration-200"
+          >
+            <IoClose className="text-xl" />
+          </button>
+        </div>
+
+        {/* Game Settings Card */}
+        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+              <IoSettings className="text-white text-sm" />
+            </div>
+            <h2 className="text-xl font-semibold text-white">Match Settings</h2>
+          </div>
+
+          <div className="flex gap-6">
+            {/* Game Mode */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-slate-300">Game Mode</label>
               <Segmented
                 options={["First to", "Best of"]}
                 value={mode}
                 onChange={(value) => handleModeChange(value)}
-                defaultValue="First to"
+                size="large"
               />
             </div>
 
-            <div>
-              <label className="block text-white text-sm mb-2">
-                Leg-ek száma
-              </label>
+            {/* Legs */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-slate-300">Number of Legs</label>
               <Segmented
                 options={Array.from({ length: maxLegLength }, (_, i) => i + 1)}
                 onChange={(value) => handleLegChange(value)}
-                defaultValue={1}
                 value={legs}
+                size="large"
               />
             </div>
 
-            <div>
-              <label className="block text-white text-sm mb-2">
-                Checkout mode
-              </label>
+            {/* Checkout Mode */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-slate-300">Checkout Mode</label>
               <Segmented
                 options={["Simple", "Double", "Triple"]}
                 onChange={(value) => handleCheckOutMode(value as CheckOutMode)}
-                defaultValue="Simple"
                 value={checkOutMode}
+                size="large"
               />
             </div>
 
-            <div>
-              <label className="block text-white text-sm mb-2">
-                Kezdő pontszám
-              </label>
+            {/* Starting Score */}
+            <div className="space-y-3">
+              <label className="block text-sm font-medium text-slate-300">Starting Score</label>
               <InputNumber
-                defaultValue={501}
+                value={startingScore}
                 onChange={(value) => handleStartingScoreChange(value)}
                 controls={false}
-                value={startingScore}
+                size="large"
               />
             </div>
           </div>
 
-          {/* Opciók */}
-          <div className="mt-4 flex justify-center gap-4">
-            <Checkbox
-              className="text-white"
-              checked={randomStartingTeam}
-              onChange={handleRandomStartingTeam}
-            >
-              Random Team
-            </Checkbox>
-
-            <Checkbox
-              className="text-white"
-              checked={randomStartingPlayer}
-              onChange={handleRandomStartingPlayer}
-            >
-              Random Player
-            </Checkbox>
+          {/* Random Options */}
+          <div className="mt-8 pt-6 border-t border-slate-700">
+            <div className="flex flex-wrap gap-6">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={randomStartingTeam}
+                  onChange={handleRandomStartingTeam}
+                  className="text-white"
+                />
+                <span className="text-slate-300 font-medium">Random Starting Team</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={randomStartingPlayer}
+                  onChange={handleRandomStartingPlayer}
+                  className="text-white"
+                />
+                <span className="text-slate-300 font-medium">Random Starting Player</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={badgeMode}
+                  onChange={handleBadgeMode}
+                  className="text-white"
+                />
+                <span className="text-slate-300 font-medium">Badge mode {badgeMode ? "On" : "Off"}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Csapatok szekció */}
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-white text-lg font-semibold">Csapatok</h2>
-            <Button type="primary" onClick={() => {AddTeam(); AddEmptyPlayerToTeam(teams.length)}}>
-              + New Team
-            </Button>
+        {/* Teams Section */}
+        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+                <IoPeople className="text-white text-sm" />
+              </div>
+              <h2 className="text-xl font-semibold text-white">Teams & Players</h2>
+              <span className="bg-emerald-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                {teams.length} {teams.length === 1 ? 'Team' : 'Teams'}
+              </span>
+            </div>
+            <button
+              onClick={() => { AddTeam(); AddEmptyPlayerToTeam(teams.length) }}
+              className="cursor-pointer flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-emerald-500/25"
+            >
+              <IoAddCircle className="text-lg" />
+              Add Team
+            </button>
           </div>
 
-          <div className="flex flex-col gap-4">
-            {teams.map((team, teamIndex) => (
-              <div
-                key={`team-${teamIndex}`}
-                className="rounded-xl bg-background-light border border-gray-700 p-4 shadow-lg"
-              >
-                {/* Csapat fejléc */}
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="text-white text-lg font-semibold">
-                    {team.name || `Csapat ${teamIndex + 1}`}
-                  </h3>
-                  <IoClose
-                    onClick={() => RemoveTeam(teamIndex)}
-                    className="text-2xl text-white/50 hover:text-red-500 cursor-pointer transition-colors"
-                  />
-                </div>
-
-                {/* Játékosok listája */}
-                <div className="space-y-3">
-                  {team.players.map((player, playerIndex) => (
-                    <div key={playerIndex} className="flex items-center gap-3">
-                      <div className="flex-1">
-                        <Select
-                          className="w-full"
-                          options={playerOptions}
-                          placeholder={`Játékos kiválasztása (${
-                            playerIndex + 1
-                          })`}
-                          value={player.playerId ?? undefined}
-                          onChange={(value) =>
-                            UpdatePlayerInTeam(teamIndex, playerIndex, value)
-                          }
-                        />
+          {/* Teams Grid */}
+          {teams.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {teams.map((team, teamIndex) => (
+                <div
+                  key={`team-${teamIndex}`}
+                  className="bg-white/10 border border-slate-600 rounded-xl p-5 hover:border-emerald-500/50 transition-all duration-300 group"
+                >
+                  {/* Team Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-lg flex items-center justify-center text-white font-bold">
+                        {teamIndex + 1}
                       </div>
-                      <IoClose
-                        onClick={() => RemovePlayer(teamIndex, playerIndex)}
-                        className="text-xl text-white/50 hover:text-red-500 cursor-pointer transition-colors flex-shrink-0"
-                      />
+                      <div>
+                        <h3 className="text-lg font-semibold text-white">{team.name}</h3>
+                        <p className="text-xs text-slate-400">{team.players.length} players</p>
+                      </div>
                     </div>
-                  ))}
-                </div>
+                    <button
+                      onClick={() => RemoveTeam(teamIndex)}
+                      className="cursor-pointer w-8 h-8 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-lg flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100"
+                    >
+                      <IoClose className="text-sm" />
+                    </button>
+                  </div>
 
-                {/* Új játékos hozzáadása gomb */}
-                <div className="mt-4 pt-3 border-t border-gray-600">
-                  <Button
-                    type="default"
-                    className="w-full border border-dashed border-primary text-color-primary hover:text-white hover:bg-primary-hover transition-all font-medium"
-                    onClick={() => AddEmptyPlayerToTeam(teamIndex)}
-                  >
-                    + Add Player
-                  </Button>
-                </div>
-              </div>
-            ))}
+                  {/* Players */}
+                  <div className="space-y-3">
+                    {team.players.map((player, playerIndex) => (
+                      <div key={playerIndex} className="flex items-center gap-3">
+                        <div className="w-6 h-6 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-xs font-medium">
+                          {playerIndex + 1}
+                        </div>
+                        <div className="flex-1">
+                          <Select
+                            size="large"
+                            className="w-full"
+                            options={playerOptions}
+                            placeholder={`Select Player ${playerIndex + 1}`}
+                            value={player.playerId ?? undefined}
+                            onChange={(value) => UpdatePlayerInTeam(teamIndex, playerIndex, value)}
+                            showSearch
+                            optionFilterProp="label"
+                            filterSort={(optionA, optionB) =>
+                              (optionA?.label ?? '').toLowerCase().localeCompare((optionB?.label ?? '').toLowerCase())
+                            }
+                          />
+                        </div>
+                        <button
+                          onClick={() => RemovePlayer(teamIndex, playerIndex)}
+                          className="cursor-pointer w-8 h-8 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-lg flex items-center justify-center transition-all duration-200"
+                        >
+                          <IoClose className="text-sm" />
+                        </button>
+                      </div>
+                    ))}
 
-            {/* Üres állapot, ha nincsenek csapatok */}
-            {teams.length === 0 && (
-              <div className="text-center py-8 text-white/60">
-                <p className="mb-4">Még nincsenek csapatok hozzáadva</p>
-                <Button type="primary" onClick={AddFirstTeam}>
-                  Add First team
-                </Button>
+                    {/* Add Player Button */}
+                    <button
+                      onClick={() => AddEmptyPlayerToTeam(teamIndex)}
+                      className="cursor-pointer w-full flex items-center justify-center gap-2 bg-slate-600 hover:bg-emerald-500/20 border border-dashed border-slate-500 hover:border-emerald-500 text-slate-400 hover:text-emerald-400 py-3 rounded-lg transition-all duration-200 font-medium"
+                    >
+                      <IoAddCircle className="text-lg" />
+                      Add Player
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* Empty State */
+            <div className="text-center py-12">
+              <div className="w-20 h-20 bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <IoPeople className="text-3xl text-slate-400" />
               </div>
-            )}
+              <h3 className="text-xl font-semibold text-slate-300 mb-2">No teams yet</h3>
+              <p className="text-slate-400 mb-6">Add your first team to get started</p>
+              <button
+                onClick={AddFirstTeam}
+                className="cursor-pointer flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-lg font-medium mx-auto transition-all duration-200 shadow-lg hover:shadow-emerald-500/25"
+              >
+                <IoAddCircle className="text-lg" />
+                Add First Team
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* New player */}
+        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+                <IoPersonAdd className="text-white text-sm" />
+              </div>
+              <h2 className="text-xl font-semibold text-white">Add new Player</h2>
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <Input
+              value={newPlayer}
+              placeholder="Player name"
+              onChange={(e) => setNewPlayer(e.target.value)}
+              size="large"
+            />
+            <button
+              onClick={AddPlayer}
+              className="cursor-pointer w-full flex items-center justify-center gap-2 bg-slate-600 hover:bg-emerald-500/20 border border-dashed border-slate-500 hover:border-emerald-500 text-slate-400 hover:text-emerald-400 py-3 rounded-lg transition-all duration-200 font-medium"
+            >
+              <IoAddCircle className="text-lg" />
+              Add Player
+            </button>
           </div>
         </div>
 
-        {/* Akció gombok */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-700">
-          <Button type="primary" size="large" onClick={handleSave}>
-            Start
-          </Button>
-        </div>
-      </Form>
+        {/* Load Match */}
+
+        {/* Action Buttons */}
+        {teams.length > 0 && (
+          <div className="flex justify-end gap-4 mt-8">
+            {/* Cancel Button - Muted emerald */}
+            <button
+              onClick={Close}
+              className="cursor-pointer flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-slate-500 text-slate-300 hover:text-slate-200 px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg"
+            >
+              <IoClose className="text-lg" />
+              Cancel
+            </button>
+
+            {/* Save Button - Medium emerald */}
+            {/* <button
+              onClick={Close}
+              className="cursor-pointer flex items-center gap-2 bg-emerald-700/30 hover:bg-emerald-600/40 border border-emerald-600/40 hover:border-emerald-500/60 text-emerald-200 hover:text-emerald-100 px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-emerald-500/15"
+            >
+              <IoSave className="text-lg" />
+              Save current match
+            </button> */}
+
+            {/* Primary Action Button - Full emerald */}
+            <button
+              onClick={handleSave}
+              className="cursor-pointer flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-emerald-500/25 ring-2 ring-emerald-400/30 hover:ring-emerald-400/50"
+            >
+              <IoPlay className="text-lg" />
+              Start Game
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

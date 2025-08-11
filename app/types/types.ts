@@ -12,6 +12,7 @@ export type Throw = {
   legId: number;
   score: number;
   remainingScore: number;
+  thrownDartsToCheckOut: number;
 };
 
 export type Team = {
@@ -38,9 +39,11 @@ export type MatchSettings = {
   checkOutMode: CheckOutMode;
   randomStartingTeam: boolean;
   randomStartingPlayer: boolean;
+  badgeMode: boolean;
 };
 
 export type Match = {
+  matchId: number;
   teams: Team[];
   legs: Leg[];
   currentTeamIndex: number;
@@ -73,3 +76,8 @@ export type CheckOut = {
 }
 
 export type ScoreHistory = 'Leg' | 'Match';
+
+export type SavedMatch = {
+  match: Match;
+  name: string;
+}

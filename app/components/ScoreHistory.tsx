@@ -36,7 +36,7 @@ const ScoreHistory: FC<ScoreHistoryProps> = ({ teamIndex }) => {
 
   return (
     <div className={`${history.length === 0 ? "hidden" : "w-full"}`}>
-      <div className="w-full flex flex-col gap-2 bg-gray-800/30 rounded-md p-2 overflow-auto no-scrollbar">
+      <div className="w-full flex flex-col gap-2 bg-gradient-to-br from-gray-800/40 to-gray-900/40 rounded-md p-2 overflow-auto no-scrollbar border border-gray-700/50">
         {/* <div className="w-full flex">
         <Segmented
           options={["Leg", "Match"]}
@@ -62,10 +62,10 @@ const ScoreHistory: FC<ScoreHistoryProps> = ({ teamIndex }) => {
             <span className="text-gray-300 text-md w-full flex justify-center">
               {score.id + 1}.
             </span>
+            <Divider type="vertical" className="bg-gray-500 h-3" />
             <span
-              className={`font-bold ${
-                score.score === 180 ? "text-rose-600" : "text-emerald-400"
-              } text-md w-full flex justify-center`}
+              className={`font-bold ${score.score === 180 ? "text-rose-600" : "text-emerald-400"
+                } text-md w-full flex justify-center`}
             >
               +{score.score}
             </span>
