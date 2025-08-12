@@ -599,7 +599,7 @@ export default function useMatch() {
 
       NextLeg();
     } else {
-      if (remaining - score <= 170) {
+      if (remaining <= 170) {
         const thrownDartsToCheckOut = await waitForCheckoutDarts();
         AddScore(score, thrownDartsToCheckOut);
       } else {
