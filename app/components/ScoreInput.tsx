@@ -38,6 +38,10 @@ const ScoreInput = () => {
     }
   };
 
+    useEffect(() => {
+    inputRef.current?.focus();
+  }, [match]); // vagy más releváns függőség
+
   const handleInputChange = (value: string) => {
     setInputValue(value);
   };
