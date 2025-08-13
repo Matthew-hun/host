@@ -775,9 +775,7 @@ export default function useMatch() {
       ...match,
       legs: updatedLeg,
       currentLegIndex: newLegIndex,
-      currentTeamIndex: match.matchSettings.randomStartingTeam
-        ? Math.floor(Math.random() * match.teams.length)
-        : (match.currentTeamIndex + 1) % match.teams.length,
+      currentTeamIndex: (match.currentLegIndex + 1) % match.teams.length,
       teams: match.teams.map((team) => ({
         ...team,
         currentPlayerIndex:
