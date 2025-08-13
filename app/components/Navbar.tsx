@@ -8,7 +8,8 @@ const menus = [
 
 const Navbar = () => {
   return (
-    <div className="min-h-[40px] text-white w-full flex justify-center items-start">
+    <div className="min-h-[40px] text-white w-full flex justify-between items-center">
+      <div></div>
       <li className="flex gap-5">
         {menus.map((menu, idx) => {
           return (
@@ -18,6 +19,7 @@ const Navbar = () => {
           );
         })}
       </li>
+      <span className="text-end text-white/30">1.0.1</span>
     </div>
   );
 };
