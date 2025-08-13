@@ -37,7 +37,6 @@ export const MatchProvider = ({ children }: { children: React.ReactNode }) => {
   const [isRunning, setIsRunning] = useState(false);
   const [isCheckOutTryOpen, setIsCheckOutTryOpen] = useState<boolean>(false);
 
-
   const checkoutResolveRef = useRef<((n: number) => void) | null>(null);
 
   const waitForCheckoutDarts = () =>
@@ -53,9 +52,18 @@ export const MatchProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <MatchContext.Provider value={{
-      match, setMatch, isRunning, setIsRunning, isCheckOutTryOpen, setIsCheckOutTryOpen, waitForCheckoutDarts, provideCheckoutDarts
-    }}>
+    <MatchContext.Provider
+      value={{
+        match,
+        setMatch,
+        isRunning,
+        setIsRunning,
+        isCheckOutTryOpen,
+        setIsCheckOutTryOpen,
+        waitForCheckoutDarts,
+        provideCheckoutDarts,
+      }}
+    >
       {children}
     </MatchContext.Provider>
   );
@@ -484,7 +492,16 @@ export default function useMatch() {
     { remainingScore: 2, dart: { dart: ["D1"] }, isValid: true },
   ];
 
-  const { match, setMatch, isRunning, setIsRunning, isCheckOutTryOpen, setIsCheckOutTryOpen, waitForCheckoutDarts, provideCheckoutDarts } = context;
+  const {
+    match,
+    setMatch,
+    isRunning,
+    setIsRunning,
+    isCheckOutTryOpen,
+    setIsCheckOutTryOpen,
+    waitForCheckoutDarts,
+    provideCheckoutDarts,
+  } = context;
 
   const CreateMatch = (
     teams: Team[],
@@ -494,7 +511,7 @@ export default function useMatch() {
     randomStartingTeam: boolean,
     randomStartingPlayer: boolean,
     checkOutMode: CheckOutMode,
-    badgeMode: boolean,
+    badgeMode: boolean
   ) => {
     // Biztosítsuk, hogy a csapatok teljesen tiszták legyenek
     const cleanTeams: Team[] = teams.map((team, index) => ({
@@ -523,7 +540,10 @@ export default function useMatch() {
     );
 
     const currentSavedMatches = localStorage.getItem("savedMatches");
-    const matchId = currentSavedMatches === null ? 1 : JSON.parse(currentSavedMatches).length + 1;
+    const matchId =
+      currentSavedMatches === null
+        ? 1
+        : JSON.parse(currentSavedMatches).length + 1;
 
     const newMatch: Match = {
       matchId: matchId,
@@ -560,7 +580,7 @@ export default function useMatch() {
     let score = 0;
     const remaining = GetRemainingScore(match.currentTeamIndex);
 
-    if (inputScore.startsWith('R') || inputScore.startsWith('r')) {
+    if (inputScore.startsWith("R") || inputScore.startsWith("r")) {
       score = remaining - Number(inputScore.slice(1, inputScore.length));
       console.log("rem:", score);
     } else {
@@ -599,12 +619,14 @@ export default function useMatch() {
 
       NextLeg();
     } else {
-      if (remaining <= 170) {
+      const nonCheckoutScores = [169, 168, 166, 165, 163, 162, 159];
+      if (remaining <= 170 && !nonCheckoutScores.includes(remaining)) {
         const thrownDartsToCheckOut = await waitForCheckoutDarts();
         AddScore(score, thrownDartsToCheckOut);
       } else {
         AddScore(score, 0);
       }
+
       IncreaseTeamIndex();
     }
   };
@@ -763,7 +785,7 @@ export default function useMatch() {
             ? match.matchSettings.randomStartingPlayer
               ? Math.floor(Math.random() * team.players.length)
               : (team.currentPlayerIndex + 1) % team.players.length
-            : team.currentPlayerIndex, // Csak a jelenlegi csapat játékos indexét növeljük, ha ő dob most        
+            : team.currentPlayerIndex, // Csak a jelenlegi csapat játékos indexét növeljük, ha ő dob most
       })),
     };
 
@@ -825,9 +847,9 @@ export default function useMatch() {
     const updatedTeam: Team[] = match.teams.map((team, idx) => {
       return idx == teamIndex
         ? {
-          ...team,
-          currentPlayerIndex: playerIndex,
-        }
+            ...team,
+            currentPlayerIndex: playerIndex,
+          }
         : team;
     });
 
@@ -854,7 +876,7 @@ export default function useMatch() {
       });
     });
 
-    return Math.round(totalTeamScore / totalTeamThrows);
+    return (totalTeamScore / totalTeamThrows).toFixed(2);
   };
 
   const CalculateLegAvg = (teamIndex: number) => {
@@ -868,7 +890,7 @@ export default function useMatch() {
         totalTeamScore += Number(score.score);
       }
     });
-    return Math.round(totalTeamScore / totalTeamThrows);
+    return (totalTeamScore / totalTeamThrows).toFixed(2);
   };
 
   const GetScoreHistory = (teamIndex: number, historyType: ScoreHistory) => {
@@ -927,7 +949,7 @@ export default function useMatch() {
     darts.forEach((d1) =>
       darts.forEach((d2) => {
         d2.type == match?.matchSettings.checkOutMode &&
-          d1.value + d2.value == remainingScore
+        d1.value + d2.value == remainingScore
           ? results.add([d1, d2])
           : null;
       })
@@ -938,7 +960,7 @@ export default function useMatch() {
       darts.forEach((d2) =>
         darts.forEach((d3) => {
           d3.type == match?.matchSettings.checkOutMode &&
-            d1.value + d2.value + d3.value == remainingScore
+          d1.value + d2.value + d3.value == remainingScore
             ? results.add([d1, d2, d3])
             : null;
         })
@@ -1034,9 +1056,12 @@ export default function useMatch() {
     if (!match || match.currentLegIndex === undefined || playerIndex === null)
       return;
 
-    return match?.legs.flatMap((leg) => leg.legScoreHistory.filter((score) =>
-      score.teamId == teamIndex && score.playerId.playerId == playerIndex
-    ));
+    return match?.legs.flatMap((leg) =>
+      leg.legScoreHistory.filter(
+        (score) =>
+          score.teamId == teamIndex && score.playerId.playerId == playerIndex
+      )
+    );
   };
 
   const CalculateMatchMileStones = (teamIndex: number, value: number) => {
@@ -1083,48 +1108,58 @@ export default function useMatch() {
         totalTeamScore += Number(score.score);
       }
     });
-    return Math.round(totalTeamScore / totalTeamThrows);
-  }
+    return (totalTeamScore / totalTeamThrows).toFixed(2);
+  };
 
   const CalculatePlayerMatchAvg = (teamIndex: number, playerIndex: number) => {
     if (!match) return;
 
     let totalTeamScore: number = 0;
     let totalTeamThrows: number = 0;
-    match.legs.flatMap((leg) => leg.legScoreHistory.map((score) => {
-      if (score.teamId == teamIndex && score.playerId.playerId == playerIndex) {
-        totalTeamThrows++;
-        totalTeamScore += Number(score.score);
-      }
-    }));
-    return Math.round(totalTeamScore / totalTeamThrows);
-  }
+    match.legs.flatMap((leg) =>
+      leg.legScoreHistory.map((score) => {
+        if (
+          score.teamId == teamIndex &&
+          score.playerId.playerId == playerIndex
+        ) {
+          totalTeamThrows++;
+          totalTeamScore += Number(score.score);
+        }
+      })
+    );
+    return (totalTeamScore / totalTeamThrows).toFixed(2);
+  };
 
   const CalculateCheckOutAvg = (teamIndex: number, playerIndex?: number) => {
     if (!match) return;
 
     let tries = 0;
-    let won = false;
-    match.legs.map((leg) => leg.legScoreHistory.map((score) => {
-      if (playerIndex) {
-        if (teamIndex == score.teamId && playerIndex == score.playerId.playerId) {
-          tries += score.thrownDartsToCheckOut;
-          if (score.remainingScore == 0) {
-            won = true;
+    let won = 0;
+    match.legs.map((leg) =>
+      leg.legScoreHistory.map((score) => {
+        if (playerIndex) {
+          if (
+            teamIndex == score.teamId &&
+            playerIndex == score.playerId.playerId
+          ) {
+            tries += score.thrownDartsToCheckOut;
+            if (score.remainingScore == 0) {
+              won++;
+            }
+          }
+        } else {
+          if (teamIndex == score.teamId) {
+            tries += score.thrownDartsToCheckOut;
+            if (score.remainingScore == 0) {
+              won++;
+            }
           }
         }
-      } else {
-        if (teamIndex == score.teamId) {
-          tries += score.thrownDartsToCheckOut;
-          if (score.remainingScore == 0) {
-            won = true;
-          }
-        }
-      }
-    }));
+      })
+    );
 
-    return won ? (1 / tries) * 100 : 0;
-  }
+    return { won: won, tries: tries, rate: (won / tries) * 100 };
+  };
 
   return {
     match,
@@ -1154,6 +1189,6 @@ export default function useMatch() {
     isCheckOutTryOpen,
     setIsCheckOutTryOpen,
     provideCheckoutDarts,
-    CalculateCheckOutAvg
+    CalculateCheckOutAvg,
   };
 }

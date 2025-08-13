@@ -83,11 +83,11 @@ const PlayerCard: FC<PlayerCardProps> = ({
     if (player && player.playerId !== null) {
       const legAvg = CalculatePlayerLegAvg(teamIndex, player.playerId);
       const matchAvg = CalculatePlayerMatchAvg(teamIndex, player.playerId);
-      const checkOutAvg = CalculateCheckOutAvg(teamIndex, player.playerId!)?.toFixed(2);
+      const checkOutAvg = CalculateCheckOutAvg(teamIndex, player.playerId!)?.rate.toFixed(2);
 
       legAvg && playerStats.push({ label: "Leg Avg:", value: legAvg });
       matchAvg && playerStats.push({ label: "Match Avg:", value: matchAvg });
-      checkOutAvg && playerStats.push({ label: "CheckOut Avg:", value: checkOutAvg + "%" });
+      checkOutAvg && !isNaN(Number(checkOutAvg)) && playerStats.push({ label: "CheckOut Avg:", value: checkOutAvg + "%" });
     }
 
     setPlayerStats(playerStats);

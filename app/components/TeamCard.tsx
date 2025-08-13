@@ -152,7 +152,7 @@ const TeamCard: FC<TeamCardProps> = ({ team, teamIndex }) => {
           </div>
 
           {/* Statistics */}
-          <TeamStatistics team={team} />
+          <TeamStatistics team={team} isActiveTeam={isActiveTeam} />
 
           <ScoreHistory teamIndex={teamIndex} />
         </div>
