@@ -42,6 +42,10 @@ const ScoreInput = () => {
     setInputValue(value);
   };
 
+  useEffect(() => {
+    inputRef.current?.focus();
+  },[match])
+
   return (
     <div className="w-full flex items-center px-20 py-5">
       {contextHolder}
