@@ -1,5 +1,5 @@
 import { Button, message } from "antd";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import useMatch from "../hooks/MatchProvider";
 
 const ScoreInput = () => {
